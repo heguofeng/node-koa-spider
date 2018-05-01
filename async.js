@@ -15,8 +15,8 @@ var urls = []; //图片地址标题库
 var arrAjax = []; //ajax api数组
 var imgSrcs = []; //api里的图片链接数组
 function getcount() {
-    superagent.get("http://www.mmjpg.com/mm/1248")
-        .set({ 'Host': 'www.mmjpg.com', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.146 Safari/537.36' })
+    superagent.get("http://img.mmjpg.com/2018/1248/1.jpg")
+        .set({ 'Host': 'img.mmjpg.com', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.146 Safari/537.36' })
         .set("Referer", "http://www.mmjpg.com/home/16")
         .end((err, res) => {
             if (err) {
@@ -25,12 +25,12 @@ function getcount() {
             } else if (res === undefined) {
                 return
             } else if (res.statusCode == 200) {
-
-                var $ = cheerio.load(res.text);
-                let pageCount = parseInt($('.main #page #opic').prev().text().trim());
-                for (i = 0; i <= pageCount; i++) {
-                    console.log(i)
-                }
+                console.log(res.headers['content-length'])
+                    // var $ = cheerio.load(res.text);
+                    // let pageCount = parseInt($('.main #page #opic').prev().text().trim());
+                    // for (i = 0; i <= pageCount; i++) {
+                    //     console.log(i)
+                    // }
 
             }
 

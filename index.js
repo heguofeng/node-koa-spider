@@ -210,29 +210,34 @@ let downloadImg = async function() {
                                 if (err) {
                                     console.log(filename + "下载失败");
                                     errDownloadCount++;
-                                    // console.log(err);
+                                    console.log(err);
                                     concurrencyCount--;
                                     callback(null)
                                 } else if (res === undefined) {
-                                    console.log(filename + "下载失败");
+                                    console.log(filename + "内容为undefined，下载失败");
                                     errDownloadCount++;
                                     concurrencyCount--;
                                     callback(null)
                                 } else if (res.statusCode == 200) {
-                                    downloadCount++;
-                                    // res.body.pipe(fs.createWriteStream(path.join(__dirname, 'pic', dir, filename)))
-                                    fs.writeFile(path.join(__dirname, 'pic', image.title, filename), res.body, (err) => {
-                                        if (err) {
-                                            console.log(err);
-                                            callback(null)
-                                        }
-                                        console.log(filename + "下载成功");
-
-                                    });
-                                    setTimeout(() => {
+                                    if (res.headers['content-length'] < 20000) { //如果图片太小，直接取消下载
+                                        console.log(filename + "该图片太小，取消下载")
                                         concurrencyCount--;
-                                        callback(null, filename)
-                                    }, delay);
+                                        callback(null)
+                                    } else {
+                                        downloadCount++;
+                                        fs.writeFile(path.join(__dirname, 'pic', image.title, filename), res.body, (err) => {
+                                            if (err) {
+                                                console.log(err);
+                                                callback(null)
+                                            }
+                                            console.log(filename + "下载成功");
+
+                                        });
+                                        setTimeout(() => {
+                                            concurrencyCount--;
+                                            callback(null, filename)
+                                        }, delay);
+                                    }
                                 }
                             } catch (error) {
                                 console("里面哪里出错啦", error);
