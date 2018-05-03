@@ -213,6 +213,7 @@ let downloadImg = async function() {
             let delay = parseInt((Math.random() * 30000000) % 1000 + 1000, 10);
             concurrencyCount++;
             console.log(`现在的并发数是${concurrencyCount}，正在下载${image.title}的${image.imgSrc}，延迟${delay}mm`);
+            let startDownload = new Date().getTime();
             return new Promise((resolve, reject) => {
                 try {
                     superagent.get(image.imgSrc)
@@ -243,7 +244,8 @@ let downloadImg = async function() {
                                                 console.log(err);
                                                 callback(null)
                                             }
-                                            console.log(formatDateTime(new Date()) + filename + "<----下载成功---->", "图片大小为" + (res.headers['content-length'] / 1000) + "KB");
+                                            let endDownload = new Date().getTime();
+                                            console.log(formatDateTime(new Date()) + filename + "<----下载成功---->", "图片大小为" + (res.headers['content-length'] / 1000) + "KB." + "耗时：" + (endDownload - startDownload) + "mm");
 
                                         });
                                         setTimeout(() => {
@@ -272,7 +274,7 @@ let downloadImg = async function() {
     // 当所有任务都执行完以后，将调用该函数
     q.drain = function() {
         console.log(formatDateTime(new Date()) + 'All img download,一共下载了' + downloadCount + "张图片;", "下载失败", errDownloadCount, "张");
-        execTime = new Date().getTime() - startTime;
+        let execTime = new Date().getTime() - startTime;
         console.log("一共耗时" + execTime + 'mm')
     }
     let images = await getAllSrcs();
