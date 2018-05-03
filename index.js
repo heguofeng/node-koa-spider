@@ -152,10 +152,11 @@ async function getAllSrcs() {
                     .end((err, res) => {
                         if (err) {
                             console.log(err)
-                            callback(null)
+                            concurrencyCount--;
+                            callback(null);
                         } else if (res === undefined) {
                             concurrencyCount--;
-                            callback(null)
+                            callback(null);
                         } else if (res.statusCode == 200) {
                             var dir = urlArr.title;
                             if (fs.existsSync(path.join(__dirname, '/pic', dir))) {
@@ -202,9 +203,11 @@ let downloadImg = async function() {
     let downloadCount = 0;
     let concurrencyCount = 0;
     let q = async.queue(function(image, callback) {
-        const filename = image.imgSrc.split('/').pop()
+
+        const filename = image.imgSrc.split('/').pop();
         if (fs.existsSync(path.join(__dirname, 'pic', image.title, filename))) {
-            console.log("已存在该文件，略过---->", image.imgSrc)
+            console.log("已存在该文件，略过---->", image.imgSrc);
+            // concurrencyCount--; //这里还未开始计算，就取消减
             callback(null);
         } else {
             let delay = parseInt((Math.random() * 30000000) % 1000 + 1000, 10);
