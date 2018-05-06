@@ -40,6 +40,7 @@ async function getUrl() {
 
     }
     let concurrencyCount = 0;
+    urlArr = []; //清空一次数据
     return new Promise((resolve, reject) => {
         let q = async.queue((webUrl, callback) => {
             // console.log("开始获取每个home页面每个人的具体信息")
@@ -70,7 +71,7 @@ async function getUrl() {
                             item.link = $(elem).eq(i).children('a').attr('href'); //主页链接
                             //需要去除标点符号，因为创建文件夹不能有一些符号
                             item.title = $(elem).eq(i).children('.title').text().replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g, "");; //标题
-                            item.id = $(elem).eq(i).children('a').attr('href').match(/\d{1,}$/)[0]; //获取id，用于拼接ajax(这里用至少一位的数字)
+                            item.id = $(elem).eq(i).children('a').attr('href').match(/\d{1,}$/)[0]; //获取id，用于拼接ajax(这里用至少一位的数字的正则表达式)
                             item.ajaxUrl = "http://www.mmjpg.com/data.php?id=" + item.id + "&page=8999" //拼接主页所有图片的ajax请求链接
                             item.url = "http://www.mmjpg.com/mm/" + item.id; //id在1255以下的图片不是用ajax拼接的，所以直接取访问原网页地址
                             urlArr.push(item)
@@ -117,7 +118,8 @@ async function getAllSrcs() {
                             concurrencyCount--;
                             callback(null)
                         } else if (res.statusCode == 200) {
-                            var dir = urlArr.title;
+                            // var dir = urlArr.title;
+                            var dir = urlArr.id;
                             if (fs.existsSync(path.join(__dirname, '/pic', dir))) {
                                 console.log(formatDateTime(new Date()) + "已存在该文件名")
                             } else {
@@ -158,7 +160,8 @@ async function getAllSrcs() {
                             concurrencyCount--;
                             callback(null);
                         } else if (res.statusCode == 200) {
-                            var dir = urlArr.title;
+                            // var dir = urlArr.title;
+                            var dir = urlArr.id;
                             if (fs.existsSync(path.join(__dirname, '/pic', dir))) {
                                 console.log(formatDateTime(new Date()) + "<----已存在该文件名--->" + dir)
                             } else {
