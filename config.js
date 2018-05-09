@@ -4,3 +4,4 @@ const config = {
     minute: 0,
     hour: [12, 24]
 }
+module.exports = config

@@ -1,5 +1,5 @@
 var mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost:27017/position"); //position是数据库
+mongoose.connect("mongodb://localhost:27017/mmjpg"); //position是数据库
 var db = mongoose.connection;
 const common = require('./common')
     //如果连接成功会执行error回调
@@ -16,17 +16,18 @@ var i = 0;
 //定义一个 schema,描述此集合里有哪些字段，字段是什么类型
 var PositionSchema = new mongoose.Schema({
     // _id: { type: Number, default: function() { return i++; } },
-    username: { type: String },
-    avatarUrl: { type: String },
-    latitude: { type: String },
-    longitude: { type: String },
-    speed: { type: String },
-    onlineStatus: { type: Boolean }
+    _dir: { type: String },
+    _imgSrc: { type: String },
+    _title: { type: String },
+    _imgId: { type: Number },
+    _link: { type: String },
+    _visitors: { type: Number },
+    _filename: { type: String }
 });
 
 //创建模型，可以用它来操作数据库中的location集合，相当于的是mysql的表
 //加入第三个参数为collection name，否则会变成复数
-var PositionModel = db.model("location", PositionSchema, "location");
+var PositionModel = db.model("pictures", PositionSchema, "pictures");
 
 module.exports = {
     //获取所有的位置记录
@@ -64,25 +65,26 @@ module.exports = {
             }
         })
     },
-    //创建一条人物位置记录
-    postMan: (username, avatarUrl) => {
+    //创建图片数据
+    postPic: (_dir, _imgSrc, _title, _imgId, _link, _visitors, _filename) => {
         //创建一个实体
         return new Promise((resolve, reject) => {
             try {
                 var PositionEntity = new PositionModel({
-                    username: username,
-                    avatarUrl: avatarUrl,
-                    latitude: '',
-                    longitude: '',
-                    speed: '',
-                    onlineStatus: false
+                    _dir: _dir,
+                    _imgSrc: _imgSrc,
+                    _title: _title,
+                    _imgId: _imgId,
+                    _link: _link,
+                    _visitors: _visitors,
+                    _filename: _filename
                 });
                 PositionEntity.save(function(err, res) {
                     if (err) {
-                        console.log(common.formatDateTime(new Date()) + "人物保存出错" + err);
+                        console.log(common.formatDateTime(new Date()) + "图片保存出错" + err);
                         reject(err);
                     } else {
-                        console.log(common.formatDateTime(new Date()), res.username, " 保存成功")
+                        console.log(common.formatDateTime(new Date()), res._title, res._imgId, res._filename, " 图片保存成功")
                         resolve(res)
                     }
                 });

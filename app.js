@@ -13,7 +13,7 @@ const webhttp = require('./webhttp')
 const schedule = require('node-schedule'); //定时器
 const app = new koa();
 const crawler = require('./crawler');
-const _config = require('./config')
+const config = require('./config')
 
 app.use(CORS())
     //声明当前不是开发环境
@@ -44,15 +44,16 @@ app.use(rest.restify());
 //自动处理URL路由
 app.use(controller());
 
-let port = _config.port;
+let port = config.port;
 let server = app.listen(port);
 console.log(`${common.formatDateTime(new Date())}后台服务已启动，端口号：` + port);
 
+crawler.downloadImg();
 //定时间抓取数据
 var rule = new schedule.RecurrenceRule();
-rule.second = _config.second;
-rule.minute = _config.minute;
-rule.hour = _config.hour;
+rule.second = config.second;
+rule.minute = config.minute;
+rule.hour = config.hour;
 var job = schedule.scheduleJob(rule, function() {
     console.log('现在时间', common.formatDateTime(new Date()));
     crawler.downloadImg();

@@ -5,6 +5,7 @@ const cheerio = require('cheerio')
 const async = require('async')
 const path = require('path')
 const common = require('./common')
+const db = require('./db')
 
 let baseUrl = "http://www.mmjpg.com/";
 let urlArr = []; //包含每个人的具体信息的数组
@@ -47,7 +48,6 @@ async function getUrl() {
             // console.log("开始获取每个home页面每个人的具体信息")
             var delay = parseInt((Math.random() * 30000000) % 1000 + 200, 10); //设置延时并发爬取
             concurrencyCount++;
-
             console.log(common.formatDateTime(new Date()) + '现在的并发数是', concurrencyCount, '，正在获取的是', webUrl, '延迟', delay, '毫秒')
             superagent.get(webUrl)
                 .set(headers)
@@ -75,6 +75,7 @@ async function getUrl() {
                             item.id = $(elem).eq(i).children('a').attr('href').match(/\d{1,}$/)[0]; //获取id，用于拼接ajax(这里用至少一位的数字的正则表达式)
                             item.ajaxUrl = "http://www.mmjpg.com/data.php?id=" + item.id + "&page=8999" //拼接主页所有图片的ajax请求链接
                             item.url = "http://www.mmjpg.com/mm/" + item.id; //id在1255以下的图片不是用ajax拼接的，所以直接取访问原网页地址
+                            item.visitors = $(elem).eq(i).children(".view").text().match(/\d{1,}/)[0];
                             urlArr.push(item)
                         }
                         setTimeout(() => {
@@ -121,10 +122,10 @@ async function getAllSrcs() {
                         } else if (res.statusCode == 200) {
                             // var dir = urlArr.title;
                             var dir = urlArr.id;
-                            if (fs.existsSync(path.join(__dirname, '/pic', dir))) {
+                            if (fs.existsSync(path.join(__dirname, '/static/pic', dir))) {
                                 console.log(common.formatDateTime(new Date()) + "已存在该文件名")
                             } else {
-                                fs.mkdir(path.join(__dirname, '/pic', dir))
+                                fs.mkdir(path.join(__dirname, '/static/pic', dir))
                                 console.log(common.formatDateTime(new Date()) + `成功创建文件夹 ${dir}`)
                             }
 
@@ -137,9 +138,11 @@ async function getAllSrcs() {
                                 var j = i + 1;
                                 let item = {}
                                 item.imgSrc = "http://img.mmjpg.com/2018/" + urlArr.id + "/" + j + "i" + arr[i] + '.jpg';
-                                item.title = dir;
+                                item.dir = dir;
                                 item.id = urlArr.id;
-
+                                item.link = urlArr.link;
+                                item.title = urlArr.title;
+                                item.visitors = urlArr.visitors;
                                 allImgUrls.push(item)
                             }
                             setTimeout(() => {
@@ -163,10 +166,10 @@ async function getAllSrcs() {
                         } else if (res.statusCode == 200) {
                             // var dir = urlArr.title;
                             var dir = urlArr.id;
-                            if (fs.existsSync(path.join(__dirname, '/pic', dir))) {
+                            if (fs.existsSync(path.join(__dirname, '/static/pic', dir))) {
                                 console.log(common.formatDateTime(new Date()) + "<----已存在该文件名--->" + dir)
                             } else {
-                                fs.mkdir(path.join(__dirname, '/pic', dir))
+                                fs.mkdir(path.join(__dirname, '/static/pic', dir))
                                 console.log(common.formatDateTime(new Date()) + `<----成功创建文件夹----> ${dir}`)
                             }
 
@@ -176,9 +179,11 @@ async function getAllSrcs() {
                             for (let i = 1; i <= pageCount; i++) {
                                 let item = {}
                                 item.imgSrc = _imgSrc + urlArr.id + "/" + i + '.jpg';
-                                item.title = dir;
+                                item.dir = dir;
                                 item.id = urlArr.id;
-
+                                item.link = urlArr.link;
+                                item.title = urlArr.title;
+                                item.visitors = urlArr.visitors;
                                 allImgUrls.push(item)
                             }
                             setTimeout(() => {
@@ -207,16 +212,15 @@ let downloadImg = async function() {
     let downloadCount = 0;
     let concurrencyCount = 0;
     let q = async.queue(function(image, callback) {
-
         const filename = image.imgSrc.split('/').pop();
-        if (fs.existsSync(path.join(__dirname, 'pic', image.title, filename))) {
+        if (fs.existsSync(path.join(__dirname, 'static', 'pic', image.dir, filename))) {
             console.log("已存在该文件，略过---->", image.imgSrc);
             // concurrencyCount--; //这里还未开始计算，就取消减
             callback(null);
         } else {
             let delay = parseInt((Math.random() * 30000000) % 1000 + 1000, 10);
             concurrencyCount++;
-            console.log(`现在的并发数是${concurrencyCount}，正在下载${image.title}的${image.imgSrc}，延迟${delay}mm`);
+            console.log(`现在的并发数是${concurrencyCount}，正在下载${image.dir}的${image.imgSrc}，延迟${delay}mm`);
             let startDownload = new Date().getTime();
             return new Promise((resolve, reject) => {
                 try {
@@ -243,14 +247,23 @@ let downloadImg = async function() {
                                         callback(null)
                                     } else {
                                         downloadCount++;
-                                        fs.writeFile(path.join(__dirname, 'pic', image.title, filename), res.body, (err) => {
+                                        fs.writeFile(path.join(__dirname, 'static', 'pic', image.dir, filename), res.body, (err) => {
                                             if (err) {
                                                 console.log(err);
                                                 callback(null)
                                             }
                                             let endDownload = new Date().getTime();
                                             console.log(common.formatDateTime(new Date()) + filename + "<----下载成功---->", "图片大小为" + (res.headers['content-length'] / 1000) + "KB." + "耗时：" + (endDownload - startDownload) + "mm");
-
+                                            //此处进行数据库存入操作 
+                                            //路径
+                                            var _dir = "/static/pic/" + image.dir + "/" + filename;
+                                            var _imgSrc = image.imgSrc; //图片路径
+                                            var _title = image.title; //标题
+                                            var _imgId = image.id; //id
+                                            var _link = image.link; //个人主页链接
+                                            var _visitors = image.visitors; //访问量
+                                            var _filename = filename;
+                                            db.postPic(_dir, _imgSrc, _title, _imgId, _link, _visitors, _filename);
                                         });
                                         setTimeout(() => {
                                             concurrencyCount--;
