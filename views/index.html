@@ -15,6 +15,8 @@
             overflow: hidden;
             background-color: #fff;
             font-size: 0.14rem;
+            visibility: hidden;
+            /* visibility: visible; */
         }
         
         .item img {
@@ -128,13 +130,79 @@
 
     var box = document.getElementById('container');
     var items = box.children;
-    // var items = box.contents();
+
     console.log(items)
         // 定义每一列之间的间隙 为10像素 
     var gap = 2;
     window.onload = function() {
-        // 一进来就调用一次 
-        waterFall();
+        if (parseInt(localStorage.getItem("page")) > 0) {
+            $.confirm({
+                title: "跳一跳",
+                text: "是否跳转至上次观看的地方",
+                onOK: function() {
+                    // 一进来就调用一次
+                    waterFall();
+                    // $(window).animate({
+                    //     scrollTop: parseInt(localStorage.getItem("maxHeight"))
+                    // }, 500);
+                    page = parseInt(localStorage.getItem("page"));
+                    $.ajax({
+                        url: "/api/pics",
+                        type: "get",
+                        data: {
+                            "page": page
+                        },
+                        dataType: "json",
+                        success: res => {
+                            page += 1;
+                            localStorage.setItem("page", page);
+                            let data = JSON.parse(res.data);
+                            console.log(data.length);
+                            let pics = []; //新的图片库
+                            for (let i in data) {
+                                pics.push(data[i]._dir);
+                            }
+                            let PromiseALl = []; //所有异步操作
+                            let imgs = []; //新的图片集合
+                            for (let i in pics) {
+                                PromiseALl[i] = new Promise((resolve, reject) => {
+                                    imgs[i] = new Image();
+                                    imgs[i].src = pics[i];
+                                    imgs[i].alt = "猜一猜";
+                                    imgs[i].onload = function() {
+                                        resolve(imgs[i]);
+                                    }
+                                });
+                            }
+                            Promise.all(PromiseALl).then((imgs) => {
+                                for (let i in imgs) {
+                                    let div = document.createElement("div");
+                                    div.className = "item";
+                                    div.append(imgs[i]);
+                                    // div.innerHTML = imgs[i];
+                                    box.append(div);
+                                }
+                                waterFall();
+                                loading = false;
+                            });
+                        },
+                        error: err => {
+                            console.log(err)
+                        }
+                    });
+                },
+                onCancel: function() {
+                    // 一进来就调用一次
+                    waterFall();
+                    localStorage.setItem("page", 0);
+                }
+            });
+
+        } else {
+            waterFall();
+        }
+
+
         // 页面尺寸改变时实时触发 
         window.onresize = function() {
             initpage();
@@ -154,8 +222,8 @@
             }, 0);
         });
         // 当加载到第30张的时候 
-        var loading = false;
-        var page = 0;
+        var loading = false; //加载状态
+        var page = 0; //页数
         var loading = false; //状态标记
         $(document.body).infinite(50).on("infinite", function() {
             if (loading) return;
@@ -169,20 +237,36 @@
                 dataType: "json",
                 success: res => {
                     page += 1;
+                    localStorage.setItem("page", page);
                     let data = JSON.parse(res.data);
                     console.log(data.length);
                     let pics = []; //新的图片库
                     for (let i in data) {
                         pics.push(data[i]._dir);
                     }
+                    let PromiseALl = []; //所有异步操作
+                    let imgs = []; //新的图片集合
                     for (let i in pics) {
-                        let div = document.createElement("div");
-                        div.className = "item";
-                        div.innerHTML = '<img src="' + pics[i] + '" alt="">';
-                        box.appendChild(div);
+                        PromiseALl[i] = new Promise((resolve, reject) => {
+                            imgs[i] = new Image();
+                            imgs[i].src = pics[i];
+                            imgs[i].alt = "猜一猜";
+                            imgs[i].onload = function() {
+                                resolve(imgs[i]);
+                            }
+                        });
                     }
-                    waterFall();
-                    loading = false;
+                    Promise.all(PromiseALl).then((imgs) => {
+                        for (let i in imgs) {
+                            let div = document.createElement("div");
+                            div.className = "item";
+                            div.append(imgs[i]);
+                            // div.innerHTML = imgs[i];
+                            box.append(div);
+                        }
+                        waterFall();
+                        loading = false;
+                    });
                 },
                 error: err => {
                     console.log(err)
@@ -199,7 +283,7 @@
         var arr = []; //高度的数组
         for (var i = 0; i < items.length; i++) {
             if (i < columns) {
-                // 2- 确定第一行 
+                // 2- 确定第一行
                 items[i].style.top = 0;
                 items[i].style.left = (gap + (itemWidth + gap) * i) / fontSize + 'rem'; //最左侧一个间隙
                 arr.push(items[i].offsetHeight);
@@ -223,6 +307,7 @@
                 arr[index] = arr[index] + items[i].offsetHeight + gap;
             }
         }
+        $("#container").css("visibility", "visible");
         //设置container高度
         let heightArr = [];
         let maxHeight; //最底处
@@ -235,6 +320,7 @@
         }
         //设置container高度用于定位加载
         $("#container").css("height", maxHeight + 'px');
+        localStorage.setItem("maxHeight", maxHeight);
     };
     // clientWidth 处理兼容性 
     function getClient() {
