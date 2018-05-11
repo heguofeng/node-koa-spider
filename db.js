@@ -111,6 +111,26 @@ module.exports = {
             }
         })
     },
+    //获取排行榜
+    getTops: (page) => {
+        return new Promise((resolve, reject) => {
+            try {
+                PicsModel.find().sort({
+                    "_visitors": -1
+                }).limit(30).skip(page * 30).exec(function(err, res) {
+                    if (err) {
+                        console.log(err);
+                        reject(err)
+                    } else {
+                        console.log("查询成功");
+                        resolve(res);
+                    }
+                });
+            } catch (error) {
+                reject(error);
+            }
+        })
+    },
     //修改第一次位置
     putOriginLocation: (_id, latitude, longitude, speed, onlineStatus) => {
         return new Promise((resolve, reject) => {

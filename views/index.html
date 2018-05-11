@@ -20,7 +20,7 @@
         }
         
         .item img {
-            width: 1.845rem;
+            /* width: 1.845rem; */
             /* width: 3.73rem; */
             display: block;
             border-radius: 0.05rem;
@@ -61,54 +61,11 @@
 
 <body>
     <div class="toolbar" id="toolbar">
-        <span class="toggle" id="toggle">切换模式</span>
+        <span class="toggle" id="getTops">排行榜</span>
+        <span class="toggle" id="toggle">单列</span>
     </div>
     <div class="container clearfix" id="container">
-        <div class="item">
-            <img src="/static/pic/1.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/2.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/3.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/4.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/5.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/6.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/7.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/8.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/9.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/10.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/11.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/12.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/13.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/14.jpg" alt="">
-        </div>
-        <div class="item">
-            <img src="/static/pic/15.jpg" alt="">
-        </div>
+        <!-- 图片 -->
     </div>
     <div class="weui-loadmore">
         <i class="weui-loading"></i>
@@ -117,9 +74,15 @@
 </body>
 <script src="/static/js/jquery.min.js"></script>
 <script src="/static/js/jquery-weui.min.js"></script>
+<script src="/static/js/swiper.min.js"></script>
 <script>
     var fontSize;
+    let toggleFlag = false;
+    let mode = "normal";
+    var loading = false; //加载状态
+    var page = 0; //页数
     initpage();
+    $(".item img").css("width", '1.845rem');
 
     function initpage() {
         var view_width = document.getElementsByTagName('html')[0].getBoundingClientRect().width;
@@ -140,66 +103,18 @@
                 title: "跳一跳",
                 text: "是否跳转至上次观看的地方",
                 onOK: function() {
-                    // 一进来就调用一次
-                    waterFall();
-                    // $(window).animate({
-                    //     scrollTop: parseInt(localStorage.getItem("maxHeight"))
-                    // }, 500);
                     page = parseInt(localStorage.getItem("page"));
-                    $.ajax({
-                        url: "/api/pics",
-                        type: "get",
-                        data: {
-                            "page": page
-                        },
-                        dataType: "json",
-                        success: res => {
-                            page += 1;
-                            localStorage.setItem("page", page);
-                            let data = JSON.parse(res.data);
-                            console.log(data.length);
-                            let pics = []; //新的图片库
-                            for (let i in data) {
-                                pics.push(data[i]._dir);
-                            }
-                            let PromiseALl = []; //所有异步操作
-                            let imgs = []; //新的图片集合
-                            for (let i in pics) {
-                                PromiseALl[i] = new Promise((resolve, reject) => {
-                                    imgs[i] = new Image();
-                                    imgs[i].src = pics[i];
-                                    imgs[i].alt = "猜一猜";
-                                    imgs[i].onload = function() {
-                                        resolve(imgs[i]);
-                                    }
-                                });
-                            }
-                            Promise.all(PromiseALl).then((imgs) => {
-                                for (let i in imgs) {
-                                    let div = document.createElement("div");
-                                    div.className = "item";
-                                    div.append(imgs[i]);
-                                    // div.innerHTML = imgs[i];
-                                    box.append(div);
-                                }
-                                waterFall();
-                                loading = false;
-                            });
-                        },
-                        error: err => {
-                            console.log(err)
-                        }
-                    });
+                    getPics(page);
                 },
                 onCancel: function() {
-                    // 一进来就调用一次
-                    waterFall();
+                    page = 0;
+                    getPics(page);
                     localStorage.setItem("page", 0);
                 }
             });
-
         } else {
-            waterFall();
+            page = 0;
+            getPics(page);
         }
 
 
@@ -212,7 +127,7 @@
         let sTop2 = 0;
         $(window).scroll(function() {
             sTop = $(this).scrollTop();
-            if (sTop >= sTop2) {
+            if (sTop > sTop2) {
                 $("#toolbar").slideUp("slow");
             } else {
                 $("#toolbar").slideDown("slow");
@@ -222,56 +137,17 @@
             }, 0);
         });
         // 当加载到第30张的时候 
-        var loading = false; //加载状态
-        var page = 0; //页数
-        var loading = false; //状态标记
-        $(document.body).infinite(50).on("infinite", function() {
+        $(document.body).infinite(150).on("infinite", function() {
             if (loading) return;
             loading = true;
-            $.ajax({
-                url: "/api/pics",
-                type: "get",
-                data: {
-                    "page": page
-                },
-                dataType: "json",
-                success: res => {
-                    page += 1;
-                    localStorage.setItem("page", page);
-                    let data = JSON.parse(res.data);
-                    console.log(data.length);
-                    let pics = []; //新的图片库
-                    for (let i in data) {
-                        pics.push(data[i]._dir);
-                    }
-                    let PromiseALl = []; //所有异步操作
-                    let imgs = []; //新的图片集合
-                    for (let i in pics) {
-                        PromiseALl[i] = new Promise((resolve, reject) => {
-                            imgs[i] = new Image();
-                            imgs[i].src = pics[i];
-                            imgs[i].alt = "猜一猜";
-                            imgs[i].onload = function() {
-                                resolve(imgs[i]);
-                            }
-                        });
-                    }
-                    Promise.all(PromiseALl).then((imgs) => {
-                        for (let i in imgs) {
-                            let div = document.createElement("div");
-                            div.className = "item";
-                            div.append(imgs[i]);
-                            // div.innerHTML = imgs[i];
-                            box.append(div);
-                        }
-                        waterFall();
-                        loading = false;
-                    });
-                },
-                error: err => {
-                    console.log(err)
-                }
-            });
+            page = parseInt(localStorage.getItem("page"));
+            console.log(page)
+            if (mode == "normal") {
+                getPics(page);
+            } else {
+                getTops(page);
+            }
+
         });
     };
     // 瀑布流行为封装成一个函数 
@@ -311,17 +187,176 @@
         //设置container高度
         let heightArr = [];
         let maxHeight; //最底处
-        for (let i = 0; i < columns; i++) {
-            let height = items[items.length - 1 - i].offsetTop + items[items.length - 1 - i].offsetHeight;
-            heightArr.push(height);
+        //图片必须大于2张
+        if (items.length > columns) {
+            for (let i = 0; i < columns; i++) {
+                let height = items[items.length - 1 - i].offsetTop + items[items.length - 1 - i].offsetHeight;
+                heightArr.push(height);
+            }
+            for (let i = 0; i < heightArr.length; i++) {
+                maxHeight = Math.max.apply(null, heightArr);
+            }
+            //设置container高度用于定位加载
+            $("#container").css("height", maxHeight + 'px');
         }
-        for (let i = 0; i < heightArr.length; i++) {
-            maxHeight = Math.max.apply(null, heightArr);
-        }
-        //设置container高度用于定位加载
-        $("#container").css("height", maxHeight + 'px');
-        localStorage.setItem("maxHeight", maxHeight);
     };
+
+    //单双列
+    $("#toggle").click(function() {
+        if (toggleFlag == false) {
+            $(".item img").css("width", '3.73rem');
+            $("#toggle").text("双列");
+            waterFall();
+            toggleFlag = true;
+        } else {
+            $(".item img").css("width", '1.845rem');
+            $("#toggle").text("单列");
+            waterFall();
+            toggleFlag = false;
+        }
+
+    });
+    //点击图片变大
+    $(".container").on("click", ".mmImg", function() {
+        $("#toolbar").slideUp("fast");
+        console.log($(this).index)
+        let pb = $.photoBrowser({
+            items: [
+                $(this).attr('src')
+            ]
+        });
+        pb.open();
+    });
+    //排行榜
+    $("#getTops").click(function() {
+        localStorage.setItem("page", 0);
+        page = parseInt(localStorage.getItem("page"));
+        $("#container").empty();
+        if (mode == "normal") {
+            $("#getTops").text("普通顺序");
+            mode = "tops";
+            getTops(page);
+        } else {
+            mode = "normal";
+            $("#getTops").text("排行榜");
+            getPics(page);
+        }
+    });
+
+    function getTops(page) {
+        $.ajax({
+            url: "/api/tops",
+            type: "get",
+            data: {
+                "page": page
+            },
+            dataType: "json",
+            success: res => {
+                page += 1;
+                localStorage.setItem("page", page);
+                let data = JSON.parse(res.data);
+                console.log(data.length);
+                let pics = []; //新的图片库
+                for (let i in data) {
+                    pics.push(data[i]._dir);
+                }
+                let PromiseALl = []; //所有异步操作
+                let imgs = []; //新的图片集合
+                for (let i in pics) {
+                    PromiseALl[i] = new Promise((resolve, reject) => {
+                        imgs[i] = new Image();
+                        imgs[i].src = pics[i];
+                        imgs[i].alt = "猜一猜";
+                        imgs[i].className = "mmImg";
+                        if (toggleFlag) {
+                            imgs[i].width = 373 / 100 * fontSize;
+                        } else {
+                            imgs[i].width = 184.5 / 100 * fontSize;
+                        }
+                        imgs[i].onload = function() {
+                            let div = document.createElement("div");
+                            div.className = "item";
+                            div.append(imgs[i]);
+                            box.append(div);
+                            waterFall();
+                            resolve(imgs[i]);
+                        }
+                    });
+                }
+                Promise.all(PromiseALl).then((imgs) => {
+                    // for (let i in imgs) {
+                    // let div = document.createElement("div");
+                    // div.className = "item";
+                    // div.append(imgs[i]);
+                    // box.append(div);
+                    // }
+                    // waterFall();
+                    loading = false;
+                });
+            },
+            error: err => {
+                console.log(err)
+            }
+        });
+    }
+    //加载图片
+    function getPics(page) {
+        console.log(page)
+        $.ajax({
+            url: "/api/pics",
+            type: "get",
+            data: {
+                "page": page
+            },
+            dataType: "json",
+            success: res => {
+                page += 1;
+                localStorage.setItem("page", page);
+                let data = JSON.parse(res.data);
+                console.log(data.length);
+                let pics = []; //新的图片库
+                for (let i in data) {
+                    pics.push(data[i]._dir);
+                }
+                let PromiseALl = []; //所有异步操作
+                let imgs = []; //新的图片集合
+                for (let i in pics) {
+                    PromiseALl[i] = new Promise((resolve, reject) => {
+                        imgs[i] = new Image();
+                        imgs[i].src = pics[i];
+                        imgs[i].alt = "猜一猜";
+                        imgs[i].className = "mmImg";
+                        if (toggleFlag) {
+                            imgs[i].width = 373 / 100 * fontSize;
+                        } else {
+                            imgs[i].width = 184.5 / 100 * fontSize;
+                        }
+                        imgs[i].onload = function() {
+                            let div = document.createElement("div");
+                            div.className = "item";
+                            div.append(imgs[i]);
+                            box.append(div);
+                            waterFall();
+                            resolve(imgs[i]);
+                        }
+                    });
+                }
+                Promise.all(PromiseALl).then((imgs) => {
+                    // for (let i in imgs) {
+                    // let div = document.createElement("div");
+                    // div.className = "item";
+                    // div.append(imgs[i]);
+                    // box.append(div);
+                    // }
+                    // waterFall();
+                    loading = false;
+                });
+            },
+            error: err => {
+                console.log(err)
+            }
+        });
+    }
     // clientWidth 处理兼容性 
     function getClient() {
         return {
@@ -333,19 +368,6 @@
     function getScrollTop() {
         return window.pageYOffset || document.documentElement.scrollTop;
     }
-    let toggleFlag = false;
-    $("#toggle").click(function() {
-        if (toggleFlag == false) {
-            $(".item img").css("width", '3.73rem');
-            waterFall();
-            toggleFlag = true;
-        } else {
-            $(".item img").css("width", '1.845rem');
-            waterFall();
-            toggleFlag = false;
-        }
-
-    });
 </script>
 
 </html>

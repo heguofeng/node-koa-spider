@@ -22,6 +22,13 @@ module.exports = {
         ctx.rest({
             data: JSON.stringify(data)
         })
+    },
+    //排行榜
+    "GET /api/tops": async(ctx, next) => {
+        let page = ctx.request.query.page;
+        let data = await db.getTops(page);
+        ctx.rest({
+            data: JSON.stringify(data)
+        })
     }
-
 }
