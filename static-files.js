@@ -12,7 +12,7 @@ function staticFiles(url, dir) {
             // 获取文件完整路径:
             let fp = path.join(dir, rpath.substring(url.length));
             // 判断文件是否存在:
-            if (await fs.exists(fp)) {
+            if (fs.existsSync(fp)) {
                 // 查找文件的mime:
                 ctx.response.type = mime.lookup(rpath);
                 // 读取文件内容并赋值给response.body:

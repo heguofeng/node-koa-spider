@@ -1,0 +1,62 @@
+body,
+ul,
+ol,
+dl,
+dt,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+input,
+select,
+textarea,
+form {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-feature-settings: -apple-system-font, Helvetica Neue, Helvetica, sans-serif;
+    font-family: -apple-system, /* English First */
+    "Helvetica Neue", "Arial", /* Chinese Fallback */
+    "PingFang SC", "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "Microsoft JhengHei", "Source Han Sans SC", "Noto Sans CJK SC", "Source Han Sans CN", "Noto Sans SC", "Source Han Sans TC", "Noto Sans CJK TC", "WenQuanYi Micro Hei", SimSun, sans-serif;
+    /* overflow-X: hidden; */
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+ul,
+li {
+    list-style: none;
+}
+
+@media only screen and(max-width:480px) {
+    box-sizing: border-box;
+}
+
+.clearfix::after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden
+}
+
+.clearfix {
+    zoom: 1;
+}
+
+.fl {
+    float: left;
+}
+
+.fr {
+    float: right;
+}

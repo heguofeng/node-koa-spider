@@ -17,7 +17,7 @@ const config = require('./config')
 
 app.use(CORS())
     //声明当前不是开发环境
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'development';
 
 app.use(async(ctx, next) => {
     console.log(`${common.formatDateTime(new Date())}Process ${ctx.request.method} ${ctx.request.url}... `);
@@ -34,7 +34,7 @@ app.use(staticFiles('/static/', path.join(__dirname, './static')));
 app.use(bodyParser());
 
 // 第四个middleware负责给ctx加上render() 来使用Nunjucks：
-app.use(templating(path.join(__dirname, './static'), {
+app.use(templating(path.join(__dirname, './views'), {
     noCache: !isProduction,
     watch: !isProduction
 }));
@@ -48,7 +48,7 @@ let port = config.port;
 let server = app.listen(port);
 console.log(`${common.formatDateTime(new Date())}后台服务已启动，端口号：` + port);
 
-crawler.downloadImg();
+// crawler.downloadImg();
 //定时间抓取数据
 var rule = new schedule.RecurrenceRule();
 rule.second = config.second;
