@@ -77,20 +77,14 @@
 <script src="/static/js/swiper.min.js"></script>
 <script>
     var fontSize;
-    let toggleFlag = false;
-    let mode = "normal";
-    var loading = false; //加载状态
+    let toggleFlag = false; //单双列
+    let mode = "normal"; //模式
+    var loading = false; //下拉刷新加载状态
     var page = 0; //页数
+    let imgLoading = true; //图片正在加载
     initpage();
-    $(".item img").css("width", '1.845rem');
-
-    function initpage() {
-        var view_width = document.getElementsByTagName('html')[0].getBoundingClientRect().width;
-        var _html = document.getElementsByTagName('html')[0];
-        _html.style.fontSize = (view_width / 375) * 100 + 'px';
-        fontSize = (view_width / 375) * 100;
-    }
-
+    $(".item img").css("width", '1.845rem'); //初始化二列
+    $.showLoading();
     var box = document.getElementById('container');
     var items = box.children;
 
@@ -104,7 +98,11 @@
                 text: "是否跳转至上次观看的地方",
                 onOK: function() {
                     page = parseInt(localStorage.getItem("page"));
-                    getPics(page);
+                    if (mode == "tops") {
+                        getTops(page - 1);
+                    } else if (mode == "normal") {
+                        getPics(page - 1);
+                    }
                 },
                 onCancel: function() {
                     page = 0;
@@ -227,17 +225,21 @@
         });
         pb.open();
     });
-    //排行榜
+    //切换排行榜
     $("#getTops").click(function() {
+        $.showLoading();
+        imgLoading = false;
         localStorage.setItem("page", 0);
         page = parseInt(localStorage.getItem("page"));
         $("#container").empty();
         if (mode == "normal") {
             $("#getTops").text("普通顺序");
             mode = "tops";
+            localStorage.setItem("mode", "tops");
             getTops(page);
         } else {
             mode = "normal";
+            localStorage.setItem("mode", "normal");
             $("#getTops").text("排行榜");
             getPics(page);
         }
@@ -274,24 +276,27 @@
                             imgs[i].width = 184.5 / 100 * fontSize;
                         }
                         imgs[i].onload = function() {
-                            let div = document.createElement("div");
-                            div.className = "item";
-                            div.append(imgs[i]);
-                            box.append(div);
-                            waterFall();
-                            resolve(imgs[i]);
+                            if (imgLoading) {
+                                $.hideLoading();
+                                console.log(i, imgLoading);
+                                let div = document.createElement("div");
+                                div.className = "item";
+                                div.append(imgs[i]);
+                                box.append(div);
+                                waterFall();
+                                resolve();
+                            } else {
+                                console.log(i, imgLoading);
+                                resolve();
+                            }
                         }
                     });
                 }
-                Promise.all(PromiseALl).then((imgs) => {
-                    // for (let i in imgs) {
-                    // let div = document.createElement("div");
-                    // div.className = "item";
-                    // div.append(imgs[i]);
-                    // box.append(div);
-                    // }
-                    // waterFall();
+                Promise.all(PromiseALl).then(() => {
+                    imgLoading = true;
                     loading = false;
+                }).catch((reason) => {
+                    console.log(reason)
                 });
             },
             error: err => {
@@ -299,7 +304,7 @@
             }
         });
     }
-    //加载图片
+    //加载普通图片
     function getPics(page) {
         console.log(page)
         $.ajax({
@@ -332,24 +337,27 @@
                             imgs[i].width = 184.5 / 100 * fontSize;
                         }
                         imgs[i].onload = function() {
-                            let div = document.createElement("div");
-                            div.className = "item";
-                            div.append(imgs[i]);
-                            box.append(div);
-                            waterFall();
-                            resolve(imgs[i]);
+                            if (imgLoading) {
+                                $.hideLoading();
+                                console.log(i, imgLoading);
+                                let div = document.createElement("div");
+                                div.className = "item";
+                                div.append(imgs[i]);
+                                box.append(div);
+                                waterFall();
+                                resolve();
+                            } else {
+                                console.log(i, imgLoading);
+                                resolve();
+                            }
                         }
                     });
                 }
-                Promise.all(PromiseALl).then((imgs) => {
-                    // for (let i in imgs) {
-                    // let div = document.createElement("div");
-                    // div.className = "item";
-                    // div.append(imgs[i]);
-                    // box.append(div);
-                    // }
-                    // waterFall();
+                Promise.all(PromiseALl).then(() => {
+                    imgLoading = true;
                     loading = false;
+                }).catch((reason) => {
+                    console.log(reason)
                 });
             },
             error: err => {
@@ -367,6 +375,13 @@
     // scrollTop兼容性处理 
     function getScrollTop() {
         return window.pageYOffset || document.documentElement.scrollTop;
+    }
+
+    function initpage() {
+        var view_width = document.getElementsByTagName('html')[0].getBoundingClientRect().width;
+        var _html = document.getElementsByTagName('html')[0];
+        _html.style.fontSize = (view_width / 375) * 100 + 'px';
+        fontSize = (view_width / 375) * 100;
     }
 </script>
 
