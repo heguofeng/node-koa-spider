@@ -16,13 +16,27 @@ var i = 0;
 //定义一个 schema,描述此集合里有哪些字段，字段是什么类型
 var PicsSchema = new mongoose.Schema({
     // _id: { type: Number, default: function() { return i++; } },
-    _dir: { type: String },
-    _imgSrc: { type: String },
-    _title: { type: String },
-    _imgId: { type: Number },
-    _link: { type: String },
-    _visitors: { type: Number },
-    _filename: { type: String }
+    _dir: {
+        type: String
+    },
+    _imgSrc: {
+        type: String
+    },
+    _title: {
+        type: String
+    },
+    _imgId: {
+        type: Number
+    },
+    _link: {
+        type: String
+    },
+    _visitors: {
+        type: Number
+    },
+    _filename: {
+        type: String
+    }
 });
 
 //创建模型，可以用它来操作数据库中的location集合，相当于的是mysql的表
@@ -51,7 +65,9 @@ module.exports = {
     getOnlineLocations: () => {
         return new Promise((resolve, reject) => {
             try {
-                PicsModel.find({ onlineStatus: true }, function(err, res) {
+                PicsModel.find({
+                    onlineStatus: true
+                }, function(err, res) {
                     if (err) {
                         console.log(common.formatDateTime(new Date()) + `获取正在线上的人的位置失败` + err);
                         reject(err);
@@ -94,10 +110,14 @@ module.exports = {
 
         })
     },
+    //按imgId顺序 递减获取图片
     getPics: (page) => {
         return new Promise((resolve, reject) => {
             try {
-                PicsModel.find().sort({ "_id": 1 }).limit(30).skip(page * 30).exec(function(err, res) {
+                let nums = 30;
+                PicsModel.find().sort({
+                    "_imgId": -1
+                }).limit(nums).skip(page * nums).exec(function(err, res) {
                     if (err) {
                         console.log(err);
                         reject(err)
@@ -111,13 +131,14 @@ module.exports = {
             }
         })
     },
-    //获取排行榜
+    //获取排行榜 根据浏览量
     getTops: (page) => {
         return new Promise((resolve, reject) => {
             try {
+                let nums = 30;
                 PicsModel.find().sort({
                     "_visitors": -1
-                }).limit(30).skip(page * 30).exec(function(err, res) {
+                }).limit(nums).skip(page * nums).exec(function(err, res) {
                     if (err) {
                         console.log(err);
                         reject(err)
@@ -131,12 +152,44 @@ module.exports = {
             }
         })
     },
+    //随机获取图片
+    getRandom: () => {
+        //总数
+        return new Promise((resolve, reject) => {
+            PicsModel.count(function(err, count) {
+                if (err) {
+                    console.log(err);
+                    reject(err);
+                } else {
+                    console.log(count)
+                    try {
+                        let promises = [];
+                        let skip;
+                        let num = 30; //多少条数据
+                        for (let i = 0; i < num; i++) {
+                            skip = Math.round(Math.random() * count);
+                            // console.log(skip);
+                            promises.push(PicsModel.find().skip(skip).limit(1).exec());
+                        }
+                        Promise.all(promises).then(function(result) {
+                            console.log("随机查询成功");
+                            resolve(result);
+                        });
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+            });
+        });
+    },
     //修改第一次位置
     putOriginLocation: (_id, latitude, longitude, speed, onlineStatus) => {
         return new Promise((resolve, reject) => {
             try {
                 //findOneAndUpdate坑爹，返回的是修改前的数据
-                PicsModel.findOneAndUpdate({ _id: _id }, {
+                PicsModel.findOneAndUpdate({
+                    _id: _id
+                }, {
                     $set: {
                         latitude: latitude,
                         longitude: longitude,
@@ -163,7 +216,9 @@ module.exports = {
     putLocations: (_id, latitude, longitude, speed) => {
         return new Promise((resolve, reject) => {
             try {
-                PicsModel.findOneAndUpdate({ _id: _id }, {
+                PicsModel.findOneAndUpdate({
+                    _id: _id
+                }, {
                     $set: {
                         latitude: latitude,
                         longitude: longitude,
@@ -189,7 +244,10 @@ module.exports = {
     putOnlineStatus: (_id, onlineStatus) => {
         return new Promise((resolve, reject) => {
             try {
-                PicsModel.findOneAndUpdate({ _id, _id }, {
+                PicsModel.findOneAndUpdate({
+                    _id,
+                    _id
+                }, {
                     $set: {
                         onlineStatus: onlineStatus,
                     }
@@ -211,7 +269,9 @@ module.exports = {
     getMan: (_id) => {
         return new Promise((resolve, reject) => {
             try {
-                PicsModel.find({ _id: _id }, function(err, res) {
+                PicsModel.find({
+                    _id: _id
+                }, function(err, res) {
                     if (err) {
                         console.log(common.formatDateTime(new Date()) + "查找失败" + err);
                         reject(err)

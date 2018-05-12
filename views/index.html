@@ -44,25 +44,59 @@
             text-align: right;
         }
         
-        .toggle {
+        .toggleList {
             padding: 0.07rem 0.15rem;
-            border: 1px solid #FA4659;
-            color: #FA4659;
             border-radius: 10px;
             margin-right: 0.1rem;
+            border: 1px solid #0960BD;
+            color: #0960BD;
+            background-color: #fff;
+        }
+        
+        .toggleList:active {
+            color: #fff;
+            background-color: #0960BD;
+        }
+        
+        .mode {
+            padding: 0.07rem 0.15rem;
+            border-radius: 10px;
+            margin-right: 0.1rem;
+        }
+        
+        .toggle {
+            border: 1px solid #FA4659;
+            color: #FA4659;
+            background-color: #fff;
         }
         
         .toggle:active {
             background-color: #FA4659;
             color: #fff;
         }
+        
+        .toggle_now {
+            background-color: #FA4659;
+            border: 1px solid #FA4659;
+            color: #fff;
+        }
+        
+        .toggle_now:active {
+            background-color: #fff;
+            color: #FA4659;
+        }
     </style>
 </head>
 
 <body>
     <div class="toolbar" id="toolbar">
-        <span class="toggle" id="getTops">排行榜</span>
-        <span class="toggle" id="toggle">单列</span>
+        <div class="fl">
+            <span class="mode toggle" id="getRandom">随机</span>
+            <span class="mode toggle" id="getTops">排行榜</span>
+            <span class="mode toggle" id="getPics">正常</span>
+        </div>
+
+        <span class="toggleList" id="toggleList">单列</span>
     </div>
     <div class="container clearfix" id="container">
         <!-- 图片 -->
@@ -78,7 +112,7 @@
 <script>
     var fontSize;
     let toggleFlag = false; //单双列
-    let mode = "normal"; //模式
+    let mode = "random"; //模式 random normal tops
     var loading = false; //下拉刷新加载状态
     var page = 0; //页数
     let imgLoading = true; //图片正在加载
@@ -92,6 +126,8 @@
         // 定义每一列之间的间隙 为10像素 
     var gap = 2;
     window.onload = function() {
+        $("#getRandom").addClass("toggle_now");
+        $("#getRandom").removeClass("toggle");
         if (parseInt(localStorage.getItem("page")) > 0) {
             $.confirm({
                 title: "跳一跳",
@@ -100,19 +136,27 @@
                     page = parseInt(localStorage.getItem("page"));
                     if (mode == "tops") {
                         getTops(page - 1);
+                        $("#getTops").addClass("toggle_now");
+                        $("#getTops").removeClass("toggle");
                     } else if (mode == "normal") {
                         getPics(page - 1);
+                        $("#getPics").addClass("toggle_now");
+                        $("#getPics").removeClass("toggle");
+                    } else if (mode == "random") {
+                        getRandom();
+                        $("#getRandom").addClass("toggle_now");
+                        $("#getRandom").removeClass("toggle");
                     }
                 },
                 onCancel: function() {
                     page = 0;
-                    getPics(page);
+                    getRandom();
                     localStorage.setItem("page", 0);
                 }
             });
         } else {
             page = 0;
-            getPics(page);
+            getRandom();
         }
 
 
@@ -142,8 +186,10 @@
             console.log(page)
             if (mode == "normal") {
                 getPics(page);
-            } else {
+            } else if (mode == "tops") {
                 getTops(page);
+            } else if (mode == "random") {
+                getRandom()
             }
 
         });
@@ -200,15 +246,15 @@
     };
 
     //单双列
-    $("#toggle").click(function() {
+    $("#toggleList").click(function() {
         if (toggleFlag == false) {
             $(".item img").css("width", '3.73rem');
-            $("#toggle").text("双列");
+            $("#toggleList").text("双列");
             waterFall();
             toggleFlag = true;
         } else {
             $(".item img").css("width", '1.845rem');
-            $("#toggle").text("单列");
+            $("#toggleList").text("单列");
             waterFall();
             toggleFlag = false;
         }
@@ -225,25 +271,87 @@
         });
         pb.open();
     });
-    //切换排行榜
-    $("#getTops").click(function() {
-        $.showLoading();
+    $("#toolbar").on("click", ".mode", function() {
+        // $.showLoading();
         imgLoading = false;
         localStorage.setItem("page", 0);
         page = parseInt(localStorage.getItem("page"));
         $("#container").empty();
-        if (mode == "normal") {
-            $("#getTops").text("普通顺序");
+        $(".mode").addClass("toggle");
+        $(".mode").removeClass("toggle_now");
+        $(this).addClass("toggle_now");
+        $(this).removeClass("toggle");
+        console.log($(this).attr("id"))
+        let nodeId = $(this).attr("id");
+        if (nodeId == "getTops") {
+            getTops(page);
             mode = "tops";
             localStorage.setItem("mode", "tops");
-            getTops(page);
-        } else {
-            mode = "normal";
-            localStorage.setItem("mode", "normal");
-            $("#getTops").text("排行榜");
+        } else if (nodeId == "getPics") {
             getPics(page);
+            mode = "tops";
+            localStorage.setItem("mode", "normal");
+        } else if (nodeId == "getRandom") {
+            getRandom();
+            mode = "tops";
+            localStorage.setItem("mode", "random");
         }
     });
+
+    function getRandom() {
+        $.ajax({
+            url: "/api/random",
+            type: "get",
+            dataType: "json",
+            success: res => {
+                let data = JSON.parse(res.data);
+                // console.log(data)
+                let pics = []; //新的图片库
+                for (let i in data) {
+                    pics.push(data[i][0]._dir); //数据格式问题，这里是二维数组
+                }
+                let PromiseALl = []; //所有异步操作
+                let imgs = []; //新的图片集合
+                for (let i in pics) {
+                    PromiseALl[i] = new Promise((resolve, reject) => {
+                        imgs[i] = new Image();
+                        imgs[i].src = pics[i];
+                        imgs[i].alt = "猜一猜";
+                        imgs[i].className = "mmImg";
+                        if (toggleFlag) {
+                            imgs[i].width = 373 / 100 * fontSize;
+                        } else {
+                            imgs[i].width = 184.5 / 100 * fontSize;
+                        }
+                        imgs[i].onload = function() {
+                            if (imgLoading) {
+                                $.hideLoading();
+                                console.log(i, imgLoading);
+                                let div = document.createElement("div");
+                                div.className = "item";
+                                div.append(imgs[i]);
+                                box.append(div);
+                                waterFall();
+                                resolve();
+                            } else {
+                                console.log(i, imgLoading);
+                                resolve();
+                            }
+                        }
+                    });
+                }
+                Promise.all(PromiseALl).then(() => {
+                    imgLoading = true;
+                    loading = false;
+                }).catch((reason) => {
+                    console.log(reason)
+                });
+            },
+            error: err => {
+                console.log(err);
+            }
+        })
+    }
 
     function getTops(page) {
         $.ajax({

@@ -30,5 +30,13 @@ module.exports = {
         ctx.rest({
             data: JSON.stringify(data)
         })
+    },
+    //随机查询
+    "GET /api/random": async(ctx, next) => {
+        let data = await db.getRandom();
+        // console.log(data)
+        ctx.rest({
+            data: JSON.stringify(data)
+        })
     }
 }
