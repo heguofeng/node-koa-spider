@@ -272,7 +272,7 @@
         pb.open();
     });
     $("#toolbar").on("click", ".mode", function() {
-        // $.showLoading();
+        $.showLoading();
         imgLoading = false;
         localStorage.setItem("page", 0);
         page = parseInt(localStorage.getItem("page"));
