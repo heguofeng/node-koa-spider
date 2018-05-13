@@ -1,7 +1,7 @@
 var fontSize;
 let toggleFlag = false; //单双列
 let mode = "random"; //模式 random normal tops
-var loading = false; //下拉刷新加载状态
+var loading = true; //下拉刷新加载状态
 var page = 0; //页数
 let imgLoading = true; //图片正在加载
 initpage();
@@ -11,7 +11,7 @@ var box = document.getElementById('container');
 var items = box.children;
 
 console.log(items)
-    // 定义每一列之间的间隙 为10像素 
+    // 定义每一列之间的间隙 为2像素 
 var gap = 2;
 window.onload = function() {
     $("#getRandom").addClass("toggle_now");
@@ -77,60 +77,11 @@ window.onload = function() {
         } else if (mode == "tops") {
             getTops(page);
         } else if (mode == "random") {
+            console.log("加载随机")
             getRandom()
         }
 
     });
-};
-// 瀑布流行为封装成一个函数 
-function waterFall() {
-    // 1- 确定列数 = 页面的宽度 / 图片的宽度 
-    var pageWidth = getClient().width;
-    var itemWidth = items[0].offsetWidth; //图片宽度
-    var columns = parseInt(pageWidth / (itemWidth + gap)); //一行两张图片
-    var arr = []; //高度的数组
-    for (var i = 0; i < items.length; i++) {
-        if (i < columns) {
-            // 2- 确定第一行
-            items[i].style.top = 0;
-            items[i].style.left = (gap + (itemWidth + gap) * i) / fontSize + 'rem'; //最左侧一个间隙
-            arr.push(items[i].offsetHeight);
-        } else {
-            // 其他行 
-            // 3- 找到数组中最小高度 和 它的索引 
-            var minHeight = arr[0];
-            var index = 0;
-            for (var j = 0; j < arr.length; j++) {
-                if (minHeight > arr[j]) {
-                    minHeight = arr[j];
-                    index = j;
-                }
-            }
-            // 4- 设置下一行的第一个盒子位置 
-            // top值就是最小列的高度 + gap 
-            items[i].style.top = (arr[index] + gap) / fontSize + 'rem';
-            // left值就是最小列距离左边的距离 
-            items[i].style.left = items[index].offsetLeft / fontSize + 'rem';
-            // 5- 修改最小列的高度 // 最小列的高度 = 当前自己的高度 + 拼接过来的高度 + 间隙的高度 
-            arr[index] = arr[index] + items[i].offsetHeight + gap;
-        }
-    }
-    $("#container").css("visibility", "visible");
-    //设置container高度
-    let heightArr = [];
-    let maxHeight; //最底处
-    //图片必须大于2张
-    if (items.length > columns) {
-        for (let i = 0; i < columns; i++) {
-            let height = items[items.length - 1 - i].offsetTop + items[items.length - 1 - i].offsetHeight;
-            heightArr.push(height);
-        }
-        for (let i = 0; i < heightArr.length; i++) {
-            maxHeight = Math.max.apply(null, heightArr);
-        }
-        //设置container高度用于定位加载
-        $("#container").css("height", maxHeight + 'px');
-    }
 };
 
 //单双列
@@ -159,6 +110,7 @@ $(".container").on("click", ".mmImg", function() {
     });
     pb.open();
 });
+//切换模式
 $("#toolbar").on("click", ".mode", function() {
     $.showLoading();
     imgLoading = false;
@@ -192,6 +144,7 @@ function getRandom() {
         type: "get",
         dataType: "json",
         success: res => {
+            loading = true;
             let data = JSON.parse(res.data);
             // console.log(data)
             let pics = []; //新的图片库
@@ -302,7 +255,7 @@ function getTops(page) {
 }
 //加载普通图片
 function getPics(page) {
-    console.log(page)
+    // console.log(page)
     $.ajax({
         url: "/api/pics",
         type: "get",
@@ -361,6 +314,56 @@ function getPics(page) {
         }
     });
 }
+// 瀑布流行为封装成一个函数 
+function waterFall() {
+    // 1- 确定列数 = 页面的宽度 / 图片的宽度 
+    var pageWidth = getClient().width;
+    var itemWidth = items[0].offsetWidth; //图片宽度
+    var columns = parseInt(pageWidth / (itemWidth + gap)); //一行两张图片
+    var arr = []; //高度的数组
+    for (var i = 0; i < items.length; i++) {
+        if (i < columns) {
+            // 2- 确定第一行
+            items[i].style.top = 0;
+            items[i].style.left = (gap + (itemWidth + gap) * i) / fontSize + 'rem'; //最左侧一个间隙
+            arr.push(items[i].offsetHeight);
+        } else {
+            // 其他行 
+            // 3- 找到数组中最小高度 和 它的索引 
+            var minHeight = arr[0];
+            var index = 0;
+            for (var j = 0; j < arr.length; j++) {
+                if (minHeight > arr[j]) {
+                    minHeight = arr[j];
+                    index = j;
+                }
+            }
+            // 4- 设置下一行的第一个盒子位置 
+            // top值就是最小列的高度 + gap 
+            items[i].style.top = (arr[index] + gap) / fontSize + 'rem';
+            // left值就是最小列距离左边的距离 
+            items[i].style.left = items[index].offsetLeft / fontSize + 'rem';
+            // 5- 修改最小列的高度 // 最小列的高度 = 当前自己的高度 + 拼接过来的高度 + 间隙的高度 
+            arr[index] = arr[index] + items[i].offsetHeight + gap;
+        }
+    }
+    $("#container").css("visibility", "visible");
+    //设置container高度
+    let heightArr = [];
+    let maxHeight; //最底处
+    //图片必须大于2张
+    if (items.length > columns) {
+        for (let i = 0; i < columns; i++) {
+            let height = items[items.length - 1 - i].offsetTop + items[items.length - 1 - i].offsetHeight;
+            heightArr.push(height);
+        }
+        for (let i = 0; i < heightArr.length; i++) {
+            maxHeight = Math.max.apply(null, heightArr);
+        }
+        //设置container高度用于定位加载
+        $("#container").css("height", maxHeight + 'px');
+    }
+};
 // clientWidth 处理兼容性 
 function getClient() {
     return {
