@@ -17,13 +17,27 @@ db.once("open", function() {
 //定义一个 schema,描述此集合里有哪些字段，字段是什么类型
 var PicsSchema = new mongoose.Schema({
     // _id: { type: Number, default: function() { return i++; } },
-    _dir: { type: String },
-    _imgSrc: { type: String },
-    _title: { type: String },
-    _imgId: { type: Number },
-    _link: { type: String },
-    _visitors: { type: Number },
-    _filename: { type: String }
+    _dir: {
+        type: String
+    },
+    _imgSrc: {
+        type: String
+    },
+    _title: {
+        type: String
+    },
+    _imgId: {
+        type: Number
+    },
+    _link: {
+        type: String
+    },
+    _visitors: {
+        type: Number
+    },
+    _filename: {
+        type: String
+    }
 });
 
 //创建模型，可以用它来操作数据库中的location集合，相当于的是mysql的表
@@ -64,7 +78,9 @@ module.exports = {
     getPics: (page) => {
         return new Promise((resolve, reject) => {
             try {
-                PicsModel.find().sort({
+                PicsModel.find({
+                    "_link": null
+                }).sort({
                     "_imgId": -1
                 }).limit(pageNums).skip(page * pageNums).exec(function(err, res) {
                     if (err) {
@@ -84,7 +100,9 @@ module.exports = {
     getTops: (page) => {
         return new Promise((resolve, reject) => {
             try {
-                PicsModel.find().sort({
+                PicsModel.find({
+                    "_link": null
+                }).sort({
                     "_visitors": -1
                 }).limit(pageNums).skip(page * pageNums).exec(function(err, res) {
                     if (err) {
@@ -104,7 +122,9 @@ module.exports = {
     getRandom: () => {
         //总数
         return new Promise((resolve, reject) => {
-            PicsModel.count(function(err, count) {
+            PicsModel.find({
+                "_link": null
+            }).count(function(err, count) {
                 if (err) {
                     console.log(err);
                     reject(err);
@@ -116,7 +136,9 @@ module.exports = {
                         for (let i = 0; i < pageNums; i++) {
                             skip = Math.round(Math.random() * count);
                             // console.log(skip);
-                            promises.push(PicsModel.find().skip(skip).limit(1).exec());
+                            promises.push(PicsModel.find({
+                                "_link": null
+                            }).skip(skip).limit(1).exec());
                         }
                         Promise.all(promises).then(function(result) {
                             console.log("随机查询成功");
@@ -145,7 +167,8 @@ module.exports = {
                         console.log(common.formatDateTime(new Date()) + "更新访问量出错" + err);
                         reject(err);
                     } else {
-                        console.log(common.formatDateTime(new Date()) + "更新访问量成功" + raw);
+                        console.log(common.formatDateTime(new Date()) + "更新访问量成功");
+                        console.log(raw)
                         resolve(raw)
                     }
                 })
@@ -166,6 +189,7 @@ module.exports = {
                         reject(err)
                     } else {
                         console.log(common.formatDateTime(new Date()) + "根据id查找一个人成功")
+
                         resolve(res);
                     }
                 })

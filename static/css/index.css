@@ -7,6 +7,10 @@
     /* visibility: visible; */
 }
 
+.pageId {
+    display: none;
+}
+
 .item img {
     /* width: 1.845rem; */
     /* width: 3.73rem; */

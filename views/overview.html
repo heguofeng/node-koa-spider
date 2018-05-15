@@ -14,6 +14,62 @@
             background-color: #f2f2f2;
         }
         
+        .toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            border-bottom: 1px solid #f2f2f2;
+            z-index: 999;
+            background-color: #fff;
+            height: 0.45rem;
+            font-size: 0.14rem;
+            line-height: 0.45rem;
+            text-align: right;
+        }
+        
+        .toggleList {
+            padding: 0.07rem 0.15rem;
+            border-radius: 10px;
+            margin-right: 0.1rem;
+            border: 1px solid #0960BD;
+            color: #0960BD;
+            background-color: #fff;
+        }
+        
+        .toggleList:active {
+            color: #fff;
+            background-color: #0960BD;
+        }
+        
+        .mode {
+            padding: 0.07rem 0.15rem;
+            border-radius: 10px;
+            margin-right: 0.1rem;
+        }
+        
+        .toggle {
+            border: 1px solid #FA4659;
+            color: #FA4659;
+            background-color: #fff;
+        }
+        
+        .toggle:active {
+            background-color: #FA4659;
+            color: #fff;
+        }
+        
+        .toggle_now {
+            background-color: #FA4659;
+            border: 1px solid #FA4659;
+            color: #fff;
+        }
+        
+        .toggle_now:active {
+            background-color: #fff;
+            color: #FA4659;
+        }
+        
         .container {
             width: 100%;
             font-size: 0.14rem;
@@ -25,22 +81,18 @@
             padding-top: 0.15rem;
         }
         
-        .img-box {
-            width: 1.7rem;
+        .item {
             box-sizing: border-box;
             background-color: #fff;
             margin-bottom: 0.15rem;
         }
         
-        .img {
-            width: 100%;
-            height: 2rem;
-            overflow: hidden;
-        }
+        .img {}
         
         .img img {
-            width: 100%;
-            /* height: 100%; */
+            width: 1.7rem;
+            height: 2.55rem;
+            overflow: hidden;
         }
         
         .text {
@@ -51,16 +103,26 @@
 </head>
 
 <body>
-    <div class="container">
-        <div class="img-box">
-            <div class="img">
-                <img src="/static/pic/1.jpg" alt="">
-            </div>
-            <div class="text">
-                <p class="title">很好舱和放哪山东黄金啊数据</p>
-            </div>
+    <div class="toolbar" id="toolbar">
+        <div class="fl">
+            <span class="mode toggle" id="getRandom">随机</span>
+            <span class="mode toggle" id="getTops">排行榜</span>
+            <span class="mode toggle" id="getPics">正常</span>
         </div>
-        <div class="img-box">
+        <span class="toggleList" id="toggleList">单列</span>
+    </div>
+    <div class="container" id="container">
+        <div class="item">
+            <a href="./details/100">
+                <div class="img">
+                    <img src="/static/pic/1.jpg" alt="">
+                </div>
+                <div class="text">
+                    <p class="title">很好舱和放哪山东黄金啊数据</p>
+                </div>
+            </a>
+        </div>
+        <div class="item">
             <div class="img">
                 <img src="/static/pic/2.jpg" alt="">
             </div>
@@ -68,7 +130,7 @@
                 <p class="title">很好舱和放哪山东黄金啊数据</p>
             </div>
         </div>
-        <div class="img-box">
+        <div class="item">
             <div class="img">
                 <img src="/static/pic/3.jpg" alt="">
             </div>
@@ -76,7 +138,7 @@
                 <p class="title">很好舱和放哪山东黄金啊数据</p>
             </div>
         </div>
-        <div class="img-box">
+        <div class="item">
             <div class="img">
                 <img src="/static/pic/4.jpg" alt="">
             </div>
@@ -84,7 +146,7 @@
                 <p class="title">很好舱和放哪山东黄金啊数据</p>
             </div>
         </div>
-        <div class="img-box">
+        <div class="item">
             <div class="img">
                 <img src="/static/pic/5.jpg" alt="">
             </div>
@@ -92,7 +154,7 @@
                 <p class="title">很好舱和放哪山东黄金啊数据</p>
             </div>
         </div>
-        <div class="img-box">
+        <div class="item">
             <div class="img">
                 <img src="/static/pic/1.jpg" alt="">
             </div>
@@ -104,20 +166,6 @@
 </body>
 <script src="/static/js/jquery.min.js"></script>
 <script src="/static/js/jquery-weui.min.js"></script>
-<script>
-    let fontSize;
-
-    function initpage() {
-        var view_width = document.getElementsByTagName('html')[0].getBoundingClientRect().width;
-        var _html = document.getElementsByTagName('html')[0];
-        _html.style.fontSize = (view_width / 375) * 100 + 'px';
-        fontSize = (view_width / 375) * 100;
-    }
-    initpage();
-    $(window).resize(function() {
-        initpage();
-
-    });
-</script>
+<script src="/static/js/overview.js"></script>
 
 </html>

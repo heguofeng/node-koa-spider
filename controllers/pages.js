@@ -4,7 +4,12 @@ module.exports = {
             title: ""
         })
     },
-    'GET /details': async(ctx, next) => {
-        ctx.render('index.html', {})
+    'GET /details/:id': async(ctx, next) => {
+        //图片人物的id
+        let id = ctx.params.id;
+        // console.log(id)
+        ctx.render('index.html', {
+            id: id
+        })
     }
 }

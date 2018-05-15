@@ -14,7 +14,7 @@ module.exports = {
             data: JSON.stringify(data)
         })
     },
-    //获取图片
+    //获取普通顺序图片
     "GET /api/pics": async(ctx, next) => {
         let page = ctx.request.query.page;
 

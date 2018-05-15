@@ -13,6 +13,8 @@
 </head>
 
 <body>
+    <div id="pageId" class="pageId">{{id}}</div>
+    <!-- 用于接受页面的id值 -->
     <div class="toolbar" id="toolbar">
         <div class="fl">
             <span class="mode toggle" id="getRandom">随机</span>
@@ -33,5 +35,8 @@
 <script src="/static/js/jquery-weui.min.js"></script>
 <script src="/static/js/swiper.min.js"></script>
 <script src="/static/js/index.js"></script>
+<script>
+    console.log($("#pageId").text())
+</script>
 
 </html>

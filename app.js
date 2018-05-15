@@ -48,7 +48,7 @@ let port = config.port;
 let server = app.listen(port);
 console.log(`${common.formatDateTime(new Date())}后台服务已启动，端口号：` + port);
 
-// crawler.downloadImg();
+crawler.downloadImg();
 //定时间抓取数据
 var rule = new schedule.RecurrenceRule();
 rule.second = config.second;

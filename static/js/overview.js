@@ -87,29 +87,21 @@ window.onload = function() {
 //单双列
 $("#toggleList").click(function() {
     if (toggleFlag == false) {
-        $(".item img").css("width", '3.73rem');
+        $(".item img").css("width", '3.75rem');
+        $(".item img").css("height", '5.625rem');
         $("#toggleList").text("双列");
-        waterFall();
+        // waterFall();
         toggleFlag = true;
     } else {
-        $(".item img").css("width", '1.845rem');
+        $(".item img").css("width", '1.7rem');
+        $(".item img").css("height", '2.55rem');
         $("#toggleList").text("单列");
-        waterFall();
+        // waterFall();
         toggleFlag = false;
     }
 
 });
-//点击图片变大
-$(".container").on("click", ".mmImg", function() {
-    $("#toolbar").slideUp("fast");
-    console.log($(this).index)
-    let pb = $.photoBrowser({
-        items: [
-            $(this).attr('src')
-        ]
-    });
-    pb.open();
-});
+
 //切换模式
 $("#toolbar").on("click", ".mode", function() {
     $.showLoading();
