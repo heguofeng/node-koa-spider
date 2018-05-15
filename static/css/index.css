@@ -77,3 +77,11 @@
     background-color: #fff;
     color: #FA4659;
 }
+
+.noMore {
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    left: 0;
+}

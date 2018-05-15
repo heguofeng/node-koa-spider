@@ -177,19 +177,18 @@ module.exports = {
             }
         });
     },
-    //根据id查找一个人
-    getMan: (_id) => {
+    //根据id查找一个人的图片
+    getDetailsByImgId: (imgId) => {
         return new Promise((resolve, reject) => {
             try {
                 PicsModel.find({
-                    _id: _id
+                    _imgId: imgId
                 }, function(err, res) {
                     if (err) {
                         console.log(common.formatDateTime(new Date()) + "查找失败" + err);
                         reject(err)
                     } else {
-                        console.log(common.formatDateTime(new Date()) + "根据id查找一个人成功")
-
+                        console.log(common.formatDateTime(new Date()) + "根据图片id查找一个人成功")
                         resolve(res);
                     }
                 })

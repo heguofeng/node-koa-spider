@@ -83,21 +83,20 @@
         
         .item {
             box-sizing: border-box;
+            overflow: hidden;
             background-color: #fff;
             margin-bottom: 0.15rem;
         }
         
-        .img {}
-        
-        .img img {
+        .mmImg {
             width: 1.7rem;
             height: 2.55rem;
-            overflow: hidden;
+            display: block;
         }
         
-        .text {
-            width: 100%;
-            height: 0.65rem;
+        .text p {
+            padding: 0.05rem;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -107,61 +106,16 @@
         <div class="fl">
             <span class="mode toggle" id="getRandom">随机</span>
             <span class="mode toggle" id="getTops">排行榜</span>
-            <span class="mode toggle" id="getPics">正常</span>
+            <span class="mode toggle" id="getNormal">正常</span>
         </div>
         <span class="toggleList" id="toggleList">单列</span>
     </div>
     <div class="container" id="container">
-        <div class="item">
-            <a href="./details/100">
-                <div class="img">
-                    <img src="/static/pic/1.jpg" alt="">
-                </div>
-                <div class="text">
-                    <p class="title">很好舱和放哪山东黄金啊数据</p>
-                </div>
-            </a>
-        </div>
-        <div class="item">
-            <div class="img">
-                <img src="/static/pic/2.jpg" alt="">
-            </div>
-            <div class="text">
-                <p class="title">很好舱和放哪山东黄金啊数据</p>
-            </div>
-        </div>
-        <div class="item">
-            <div class="img">
-                <img src="/static/pic/3.jpg" alt="">
-            </div>
-            <div class="text">
-                <p class="title">很好舱和放哪山东黄金啊数据</p>
-            </div>
-        </div>
-        <div class="item">
-            <div class="img">
-                <img src="/static/pic/4.jpg" alt="">
-            </div>
-            <div class="text">
-                <p class="title">很好舱和放哪山东黄金啊数据</p>
-            </div>
-        </div>
-        <div class="item">
-            <div class="img">
-                <img src="/static/pic/5.jpg" alt="">
-            </div>
-            <div class="text">
-                <p class="title">很好舱和放哪山东黄金啊数据</p>
-            </div>
-        </div>
-        <div class="item">
-            <div class="img">
-                <img src="/static/pic/1.jpg" alt="">
-            </div>
-            <div class="text">
-                <p class="title">很好舱和放哪山东黄金啊数据</p>
-            </div>
-        </div>
+
+    </div>
+    <div class="weui-loadmore">
+        <i class="weui-loading"></i>
+        <span class="weui-loadmore__tips">正在加载</span>
     </div>
 </body>
 <script src="/static/js/jquery.min.js"></script>
