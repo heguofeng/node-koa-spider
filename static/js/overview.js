@@ -3,7 +3,7 @@ let toggleFlag = false; //单双列
 let mode; //模式 random normal tops
 var loading = true; //下拉刷新加载状态
 var page = 0; //页数
-let imgLoading = true; //图片正在加载
+
 initpage();
 $(".item img").css("width", '1.845rem'); //初始化二列
 $.showLoading();
@@ -12,7 +12,7 @@ var box = document.getElementById('container');
 window.onload = function() {
     $("#getRandom").addClass("toggle_now");
     $("#getRandom").removeClass("toggle");
-    if (parseInt(localStorage.getItem("page")) > 0) {
+    if (parseInt(localStorage.getItem("page")) > 0 && localStorage.getItem("mode") != "random") {
         $.confirm({
             title: "跳一跳",
             text: "是否跳转至上次观看的地方",
@@ -27,10 +27,6 @@ window.onload = function() {
                     getNormal(page - 1);
                     $("#getNormal").addClass("toggle_now");
                     $("#getNormal").removeClass("toggle");
-                } else if (mode == "random") {
-                    getRandom();
-                    $("#getRandom").addClass("toggle_now");
-                    $("#getRandom").removeClass("toggle");
                 }
             },
             onCancel: function() {
@@ -103,9 +99,6 @@ $("#toggleList").click(function() {
 //切换模式
 $("#toolbar").on("click", ".mode", function() {
     $.showLoading();
-    if (imgLoading) {
-        imgLoading = false;
-    }
     localStorage.setItem("page", 0);
     page = parseInt(localStorage.getItem("page"));
     $("#container").empty();
@@ -160,27 +153,22 @@ function getRandom() {
                         $(".text").width(170 / 100 * fontSize)
                     }
                     imgs[i].onload = function() {
-                        if (imgLoading) {
-                            $.hideLoading();
-                            console.log(i, imgLoading, toggleFlag);
-                            let div = document.createElement("div");
-                            div.className = "item";
-                            div.append(imgs[i]);
-                            $(div).append("<div class='text'><p class='title'>" + pics[i]._title + "</p></div>");
-                            if (toggleFlag) {
-                                $(".item").width(375 / 100 * fontSize);
-                                $(".text").width(375 / 100 * fontSize);
-                            } else {
-                                $(".item").width(170 / 100 * fontSize);
-                                $(".text").width(170 / 100 * fontSize);
-                            }
-                            $(div).wrapInner(`<a href="./details/${pics[i]._imgId}"></a>`);
-                            box.append(div);
-                            resolve();
+                        $.hideLoading();
+                        let div = document.createElement("div");
+                        div.className = "item";
+                        div.append(imgs[i]);
+                        $(div).append("<div class='text'><p class='title'>" + pics[i]._title + "</p></div>");
+                        if (toggleFlag) {
+                            $(".item").width(375 / 100 * fontSize);
+                            $(".text").width(375 / 100 * fontSize);
                         } else {
-                            console.log(i, imgLoading);
-                            resolve();
+                            $(".item").width(170 / 100 * fontSize);
+                            $(".text").width(170 / 100 * fontSize);
                         }
+                        $(div).wrapInner(`<a href="./details/${pics[i]._imgId}"></a>`);
+                        box.append(div);
+                        resolve();
+
                     }
                 });
             }
@@ -192,7 +180,7 @@ function getRandom() {
                     $(".item").width(170 / 100 * fontSize);
                     $(".text").width(170 / 100 * fontSize);
                 }
-                imgLoading = true;
+
                 loading = false;
             }).catch((reason) => {
                 console.log(reason)
@@ -244,27 +232,24 @@ function getTops(page) {
                         $(".text").width(170 / 100 * fontSize)
                     }
                     imgs[i].onload = function() {
-                        if (imgLoading) {
-                            $.hideLoading();
-                            console.log(i, imgLoading, toggleFlag);
-                            let div = document.createElement("div");
-                            div.className = "item";
-                            div.append(imgs[i]);
-                            $(div).append("<div class='text'><p class='title'>" + pics[i]._title + "</p></div>");
-                            if (toggleFlag) {
-                                $(".item").width(375 / 100 * fontSize);
-                                $(".text").width(375 / 100 * fontSize);
-                            } else {
-                                $(".item").width(170 / 100 * fontSize);
-                                $(".text").width(170 / 100 * fontSize);
-                            }
-                            $(div).wrapInner(`<a href="./details/${pics[i]._imgId}"></a>`);
-                            box.append(div);
-                            resolve();
+
+                        $.hideLoading();
+
+                        let div = document.createElement("div");
+                        div.className = "item";
+                        div.append(imgs[i]);
+                        $(div).append("<div class='text'><p class='title'>" + pics[i]._title + "</p></div>");
+                        if (toggleFlag) {
+                            $(".item").width(375 / 100 * fontSize);
+                            $(".text").width(375 / 100 * fontSize);
                         } else {
-                            console.log(i, imgLoading);
-                            resolve();
+                            $(".item").width(170 / 100 * fontSize);
+                            $(".text").width(170 / 100 * fontSize);
                         }
+                        $(div).wrapInner(`<a href="./details/${pics[i]._imgId}"></a>`);
+                        box.append(div);
+                        resolve();
+
                     }
                 });
             }
@@ -276,7 +261,7 @@ function getTops(page) {
                     $(".item").width(170 / 100 * fontSize);
                     $(".text").width(170 / 100 * fontSize);
                 }
-                imgLoading = true;
+
                 loading = false;
             }).catch((reason) => {
                 console.log(reason)
@@ -329,27 +314,24 @@ function getNormal(page) {
                         $(".text").width(170 / 100 * fontSize)
                     }
                     imgs[i].onload = function() {
-                        if (imgLoading) {
-                            $.hideLoading();
-                            console.log(i, imgLoading, toggleFlag);
-                            let div = document.createElement("div");
-                            div.className = "item";
-                            div.append(imgs[i]);
-                            $(div).append("<div class='text'><p class='title'>" + pics[i]._title + "</p></div>");
-                            if (toggleFlag) {
-                                $(".item").width(375 / 100 * fontSize);
-                                $(".text").width(375 / 100 * fontSize);
-                            } else {
-                                $(".item").width(170 / 100 * fontSize);
-                                $(".text").width(170 / 100 * fontSize);
-                            }
-                            $(div).wrapInner(`<a href="./details/${pics[i]._imgId}"></a>`);
-                            box.append(div);
-                            resolve();
+
+                        $.hideLoading();
+
+                        let div = document.createElement("div");
+                        div.className = "item";
+                        div.append(imgs[i]);
+                        $(div).append("<div class='text'><p class='title'>" + pics[i]._title + "</p></div>");
+                        if (toggleFlag) {
+                            $(".item").width(375 / 100 * fontSize);
+                            $(".text").width(375 / 100 * fontSize);
                         } else {
-                            console.log(i, imgLoading);
-                            resolve();
+                            $(".item").width(170 / 100 * fontSize);
+                            $(".text").width(170 / 100 * fontSize);
                         }
+                        $(div).wrapInner(`<a href="./details/${pics[i]._imgId}"></a>`);
+                        box.append(div);
+                        resolve();
+
                     }
                 });
             }
@@ -361,7 +343,7 @@ function getNormal(page) {
                     $(".item").width(170 / 100 * fontSize);
                     $(".text").width(170 / 100 * fontSize);
                 }
-                imgLoading = true;
+
                 loading = false;
             }).catch((reason) => {
                 console.log(reason)

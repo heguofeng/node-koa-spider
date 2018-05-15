@@ -3,7 +3,6 @@ let toggleFlag = false; //单双列
 let mode; //模式 random normal tops
 var loading = true; //下拉刷新加载状态
 var page = 0; //页数
-let imgLoading = true; //图片正在加载
 initpage();
 $(".item img").css("width", '1.845rem'); //初始化二列
 $.showLoading();
@@ -101,26 +100,23 @@ function getPics(page) {
                         imgs[i].width = 184.5 / 100 * fontSize;
                     }
                     imgs[i].onload = function() {
-                        if (imgLoading) {
-                            $.hideLoading();
-                            console.log(i, imgLoading);
-                            let div = document.createElement("div");
-                            div.className = "item";
-                            div.append(imgs[i]);
-                            box.append(div);
-                            waterFall();
-                            resolve();
-                        } else {
-                            console.log(i, imgLoading);
-                            resolve();
-                        }
+
+                        $.hideLoading();
+
+                        let div = document.createElement("div");
+                        div.className = "item";
+                        div.append(imgs[i]);
+                        box.append(div);
+                        waterFall();
+                        resolve();
+
                     }
                 });
             }
             Promise.all(PromiseALl).then(() => {
                 // $(box).append(`<p class="">没有更多了</p>`);
                 // waterFall();
-                imgLoading = true;
+
                 loading = false;
             }).catch((reason) => {
                 console.log(reason)
