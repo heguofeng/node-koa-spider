@@ -3,8 +3,42 @@ require('superagent-proxy')(superagent);
 const cheerio = require('cheerio')
 const fs = require('fs')
 const path = require('path')
+const common = require('../common')
     // 写上你先要测试的 ip，下面仅为测试ip
 var urls = []; //图片地址标题库
+//创建pic文件夹，仅运行一次
+//创建pic文件夹，仅运行一次
+//创建pic文件夹，仅运行一次
+if (fs.existsSync(path.join(__dirname, "/static/pic"))) {
+    console.log(common.formatDateTime(new Date()) + "<----已存在pic文件夹--->");
+    mkMain()
+} else {
+    fs.mkdir(path.join(__dirname, "/static/pic"), err => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(common.formatDateTime(new Date()) + "成功创建pic文件夹");
+            mkMain()
+        }
+    });
+
+}
+
+function mkMain() {
+    //首次  需要创建主图文件夹用于存放主图
+    if (fs.existsSync(path.join(__dirname, "/static/pic/main"))) {
+        console.log(common.formatDateTime(new Date()) + "<----已存在主图文件夹--->")
+    } else {
+        fs.mkdir(path.join(__dirname, "/static/pic/main"), err => {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(common.formatDateTime(new Date()) + "成功创建主图文件夹");
+            }
+        });
+
+    }
+}
 
 function getPic() {
     superagent
@@ -56,4 +90,4 @@ function downloadPic(urls) {
         })
     }
 }
-getPic()
+// getPic()

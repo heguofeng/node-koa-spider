@@ -18,6 +18,7 @@ var headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.146 Safari/537.36",
     "Host": "www.mmjpg.com"
 }
+
 var headers_img = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
     "Accept-Encoding": "gzip, deflate",
@@ -41,12 +42,35 @@ async function getUrl() {
         }
 
     };
-    //首次  需要创建主图文件夹用于存放主图
-    if (fs.existsSync(path.join(__dirname, "static/pic/main"))) {
-        console.log(common.formatDateTime(new Date()) + "<----已存在主图文件夹--->")
+    //创建pic文件夹，仅运行一次
+    if (fs.existsSync(path.join(__dirname, "/static/pic"))) {
+        console.log(common.formatDateTime(new Date()) + "<----已存在pic文件夹--->");
+        mkMain()
     } else {
-        fs.mkdir(path.join(__dirname, "static/pic/main"));
-        console.log(common.formatDateTime(new Date()) + "成功创建主图文件夹")
+        fs.mkdir(path.join(__dirname, "/static/pic"), err => {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(common.formatDateTime(new Date()) + "成功创建pic文件夹");
+                mkMain()
+            }
+        });
+
+    }
+    //首次  需要创建主图文件夹用于存放主图
+    function mkMain() {
+        if (fs.existsSync(path.join(__dirname, "/static/pic/main"))) {
+            console.log(common.formatDateTime(new Date()) + "<----已存在主图文件夹--->")
+        } else {
+            fs.mkdir(path.join(__dirname, "/static/pic/main"), err => {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log(common.formatDateTime(new Date()) + "成功创建主图文件夹");
+                }
+            });
+
+        }
     }
 
     let concurrencyCount = 0; //当前并发数
@@ -220,106 +244,106 @@ async function getAllSrcs() {
 }
 
 let downloadImg = async function() {
-        let startTime = new Date().getTime(); //开始时间
-        console.log(common.formatDateTime(new Date()) + "开始下载图片...");
-        let errDownloadCount = 0;
-        let downloadCount = 0;
-        let concurrencyCount = 0;
-        let q = async.queue(function(image, callback) {
-            const filename = image.imgSrc.split('/').pop();
-            //路径  唯一
-            var _dir = "/static/pic/" + image.dir + "/" + filename;
-            var _imgSrc = image.imgSrc; //图片路径
-            var _title = image.title; //标题
-            var _imgId = image.id; //人的id
-            var _link = image.link; //个人主页链接
-            var _visitors = image.visitors; //访问量
-            var _filename = filename; //文件名
+    let startTime = new Date().getTime(); //开始时间
+    console.log(common.formatDateTime(new Date()) + "开始下载图片...");
+    let errDownloadCount = 0;
+    let downloadCount = 0;
+    let concurrencyCount = 0;
+    let q = async.queue(function(image, callback) {
+        const filename = image.imgSrc.split('/').pop();
+        //路径  唯一
+        var _dir = "/static/pic/" + image.dir + "/" + filename;
+        var _imgSrc = image.imgSrc; //图片路径
+        var _title = image.title; //标题
+        var _imgId = image.id; //人的id
+        var _link = image.link; //个人主页链接
+        var _visitors = image.visitors; //访问量
+        var _filename = filename; //文件名
 
-            let delay = parseInt((Math.random() * 30000000) % 1000 + 1000, 10);
-            concurrencyCount++;
-            console.log(`现在的并发数是${concurrencyCount}，正在下载${image.dir}的${image.imgSrc}，延迟${delay}mm`);
+        let delay = parseInt((Math.random() * 30000000) % 1000 + 1000, 10);
+        concurrencyCount++;
+        console.log(`现在的并发数是${concurrencyCount}，正在下载${image.dir}的${image.imgSrc}，延迟${delay}mm`);
 
-            if (fs.existsSync(path.join(__dirname, 'static', 'pic', image.dir, filename))) {
-                //这里用异步函数等待一下数据库存取
-                (async function() {
-                    console.log(common.formatDateTime(new Date()) + "已存在该文件，就略过咯---->", image.imgSrc, "进行更新访问量操作");
-                    await db.putVisitors(_dir, _visitors);
-                    concurrencyCount--;
-                    callback(null);
-                })()
-            } else {
-                let startDownload = new Date().getTime();
-                return new Promise((resolve, reject) => {
-                    try {
-                        superagent.get(image.imgSrc)
-                            .set(headers_img)
-                            .set('Referer', 'http://www.mmjpg.com/mm/' + image.id)
-                            .timeout(30000)
-                            .end((err, res) => {
-                                try {
-                                    if (err) {
-                                        console.log(common.formatDateTime(new Date()) + image.imgSrc + "---->下载失败");
-                                        errDownloadCount++;
-                                        concurrencyCount--;
-                                        callback(null)
-                                    } else if (res === undefined) {
-                                        console.log(common.formatDateTime(new Date()) + filename + "---->内容为undefined，下载失败");
-                                        errDownloadCount++;
-                                        concurrencyCount--;
-                                        callback(null)
-                                    } else if (res.statusCode == 200) {
-                                        if (parseInt(res.headers['content-length']) <= 20000) { //如果图片太小，直接取消下载
-                                            console.log(common.formatDateTime(new Date()) + image.imgSrc + "---->该图片太小，取消下载")
-                                            concurrencyCount--;
-                                            callback(null)
-                                        } else {
-                                            downloadCount++;
-                                            fs.writeFile(path.join(__dirname, 'static', 'pic', image.dir, filename), res.body, (err) => {
-                                                if (err) {
-                                                    console.log(err);
-                                                    concurrencyCount--;
-                                                    callback(null);
-
-                                                }
-                                                let endDownload = new Date().getTime();
-                                                console.log(common.formatDateTime(new Date()) + filename + "<----下载成功---->", "图片大小为" + (res.headers['content-length'] / 1000) + "KB." + "耗时：" + (endDownload - startDownload) + "mm");
-                                                //此处进行数据库存入操作 
-                                                db.postPic(_dir, _imgSrc, _title, _imgId, _link, _visitors, _filename);
-                                            });
-                                            setTimeout(() => {
-                                                concurrencyCount--;
-                                                callback(null, filename)
-                                            }, delay);
-                                        }
-                                    }
-                                } catch (error) {
-                                    console.log(common.formatDateTime(new Date()) + "里面哪里出错啦", error);
+        if (fs.existsSync(path.join(__dirname, 'static', 'pic', image.dir, filename))) {
+            //这里用异步函数等待一下数据库存取
+            (async function() {
+                console.log(common.formatDateTime(new Date()) + "已存在该文件，就略过咯---->", image.imgSrc, "进行更新访问量操作");
+                await db.putVisitors(_dir, _visitors);
+                concurrencyCount--;
+                callback(null);
+            })()
+        } else {
+            let startDownload = new Date().getTime();
+            return new Promise((resolve, reject) => {
+                try {
+                    superagent.get(image.imgSrc)
+                        .set(headers_img)
+                        .set('Referer', 'http://www.mmjpg.com/mm/' + image.id)
+                        .timeout(30000)
+                        .end((err, res) => {
+                            try {
+                                if (err) {
+                                    console.log(common.formatDateTime(new Date()) + image.imgSrc + "---->下载失败");
+                                    errDownloadCount++;
                                     concurrencyCount--;
-                                    callback(null, filename)
+                                    callback(null)
+                                } else if (res === undefined) {
+                                    console.log(common.formatDateTime(new Date()) + filename + "---->内容为undefined，下载失败");
+                                    errDownloadCount++;
+                                    concurrencyCount--;
+                                    callback(null)
+                                } else if (res.statusCode == 200) {
+                                    if (parseInt(res.headers['content-length']) <= 20000) { //如果图片太小，直接取消下载
+                                        console.log(common.formatDateTime(new Date()) + image.imgSrc + "---->该图片太小，取消下载")
+                                        concurrencyCount--;
+                                        callback(null)
+                                    } else {
+                                        downloadCount++;
+                                        fs.writeFile(path.join(__dirname, 'static', 'pic', image.dir, filename), res.body, (err) => {
+                                            if (err) {
+                                                console.log(err);
+                                                concurrencyCount--;
+                                                callback(null);
+
+                                            }
+                                            let endDownload = new Date().getTime();
+                                            console.log(common.formatDateTime(new Date()) + filename + "<----下载成功---->", "图片大小为" + (res.headers['content-length'] / 1000) + "KB." + "耗时：" + (endDownload - startDownload) + "mm");
+                                            //此处进行数据库存入操作 
+                                            db.postPic(_dir, _imgSrc, _title, _imgId, _link, _visitors, _filename);
+                                        });
+                                        setTimeout(() => {
+                                            concurrencyCount--;
+                                            callback(null, filename)
+                                        }, delay);
+                                    }
                                 }
+                            } catch (error) {
+                                console.log(common.formatDateTime(new Date()) + "里面哪里出错啦", error);
+                                concurrencyCount--;
+                                callback(null, filename)
+                            }
 
-                            });
-                    } catch (error) {
-                        console.log(common.formatDateTime(new Date()) + "哪里出错啦", error);
-                        concurrencyCount--;
-                        callback(null, filename)
-                    }
+                        });
+                } catch (error) {
+                    console.log(common.formatDateTime(new Date()) + "哪里出错啦", error);
+                    concurrencyCount--;
+                    callback(null, filename)
+                }
 
-                });
-            }
-        }, config.concurrency)
-
-        // 当所有任务都执行完以后，将调用该函数
-        q.drain = function() {
-            console.log(common.formatDateTime(new Date()) + 'All img download,一共下载了' + downloadCount + "张图片;", "下载失败", errDownloadCount, "张");
-            let execTime = new Date().getTime() - startTime;
-            console.log("一共耗时" + execTime + 'mm')
+            });
         }
-        let images = await getAllSrcs();
-        q.push(images)
+    }, config.concurrency)
+
+    // 当所有任务都执行完以后，将调用该函数
+    q.drain = function() {
+        console.log(common.formatDateTime(new Date()) + 'All img download,一共下载了' + downloadCount + "张图片;", "下载失败", errDownloadCount, "张");
+        let execTime = new Date().getTime() - startTime;
+        console.log("一共耗时" + execTime + 'mm')
     }
-    //下载主图
+    let images = await getAllSrcs();
+    q.push(images)
+};
+//下载主图
 async function downloadMainPics(imgs) {
     // console.log(imgs)
     let startTime = new Date().getTime(); //开始时间
