@@ -3,7 +3,6 @@ let toggleFlag = false; //单双列
 let mode; //模式 random normal tops
 var loading = true; //下拉刷新加载状态
 var page = 0; //页数
-let imgLoading = true; //图片正在加载
 initpage();
 $(".item img").css("width", '1.845rem'); //初始化二列
 $.showLoading();
@@ -13,77 +12,34 @@ console.log(items)
     // 定义每一列之间的间隙 为2像素 
 var gap = 2;
 window.onload = function() {
-    $("#getRandom").addClass("toggle_now");
-    $("#getRandom").removeClass("toggle");
-    if (parseInt(localStorage.getItem("page")) > 0) {
-        $.confirm({
-            title: "跳一跳",
-            text: "是否跳转至上次观看的地方",
-            onOK: function() {
-                page = parseInt(localStorage.getItem("page"));
-                if (mode == "tops") {
-                    getTops(page - 1);
-                    $("#getTops").addClass("toggle_now");
-                    $("#getTops").removeClass("toggle");
-                } else if (mode == "normal") {
-                    getPics(page - 1);
-                    $("#getPics").addClass("toggle_now");
-                    $("#getPics").removeClass("toggle");
-                } else if (mode == "random") {
-                    getRandom();
-                    $("#getRandom").addClass("toggle_now");
-                    $("#getRandom").removeClass("toggle");
-                }
-            },
-            onCancel: function() {
-                page = 0;
-                getRandom();
-                localStorage.setItem("page", 0);
-            }
-        });
-    } else {
-        page = 0;
-        getRandom();
-        // getPics()
-    }
-
-
-    // 页面尺寸改变时实时触发 
-    window.onresize = function() {
-        initpage();
-        waterFall();
-    };
-    let sTop = 0;
-    let sTop2 = 0;
-    $(window).scroll(function() {
-        sTop = $(this).scrollTop();
-        if (sTop > sTop2) {
-            $("#toolbar").slideUp("slow");
-        } else {
-            $("#toolbar").slideDown("slow");
-        }
-        setTimeout(() => {
-            sTop2 = sTop;
-        }, 0);
-    });
+    getPics(page);
     // 当加载到第最后一张的时候 
-    $(document.body).infinite(150).on("infinite", function() {
-        if (loading) return;
-        loading = true;
-        page = parseInt(localStorage.getItem("page"));
-        // console.log(page)
-        if (mode == "normal") {
-            getPics(page);
-        } else if (mode == "tops") {
-            getTops(page);
-        } else if (mode == "random") {
-            console.log("加载随机")
-            getRandom()
-        }
+    // $(document.body).infinite(150).on("infinite", function() {
+    //     if (loading) return;
+    //     loading = true;
+    //     page = parseInt(localStorage.getItem("page"));
+    //     getPics(page);
 
-    });
+    // });
 };
-
+// 页面尺寸改变时实时触发 
+window.onresize = function() {
+    initpage();
+    waterFall();
+};
+let sTop = 0;
+let sTop2 = 0;
+$(window).scroll(function() {
+    sTop = $(this).scrollTop();
+    if (sTop > sTop2) {
+        $("#toolbar").slideUp("slow");
+    } else {
+        $("#toolbar").slideDown("slow");
+    }
+    setTimeout(() => {
+        sTop2 = sTop;
+    }, 0);
+});
 //单双列
 $("#toggleList").click(function() {
     if (toggleFlag == false) {
@@ -110,154 +66,12 @@ $(".container").on("click", ".mmImg", function() {
     });
     pb.open();
 });
-//切换模式
-$("#toolbar").on("click", ".mode", function() {
-    $.showLoading();
-    imgLoading = false;
-    localStorage.setItem("page", 0);
-    page = parseInt(localStorage.getItem("page"));
-    $("#container").empty();
-    $(".mode").addClass("toggle");
-    $(".mode").removeClass("toggle_now");
-    $(this).addClass("toggle_now");
-    $(this).removeClass("toggle");
-    console.log($(this).attr("id"))
-    let nodeId = $(this).attr("id");
-    if (nodeId == "getTops") {
-        getTops(page);
-        mode = "tops";
-        localStorage.setItem("mode", "tops");
-    } else if (nodeId == "getPics") {
-        getPics(page);
-        mode = "normal";
-        localStorage.setItem("mode", "normal");
-    } else if (nodeId == "getRandom") {
-        getRandom();
-        mode = "random";
-        localStorage.setItem("mode", "random");
-    }
-});
 
-function getRandom() {
-    $.ajax({
-        url: "/api/random",
-        type: "get",
-        dataType: "json",
-        success: res => {
-            loading = true;
-            let data = JSON.parse(res.data);
-            // console.log(data)
-            let pics = []; //新的图片库
-            for (let i in data) {
-                pics.push(data[i][0]._dir); //数据格式问题，这里是二维数组
-            }
-            let PromiseALl = []; //所有异步操作
-            let imgs = []; //新的图片集合
-            for (let i in pics) {
-                PromiseALl[i] = new Promise((resolve, reject) => {
-                    imgs[i] = new Image();
-                    imgs[i].src = pics[i];
-                    imgs[i].alt = "猜一猜";
-                    imgs[i].className = "mmImg";
-                    if (toggleFlag) {
-                        imgs[i].width = 373 / 100 * fontSize;
-                    } else {
-                        imgs[i].width = 184.5 / 100 * fontSize;
-                    }
-                    imgs[i].onload = function() {
-                        if (imgLoading) {
-                            $.hideLoading();
-                            console.log(i, imgLoading);
-                            let div = document.createElement("div");
-                            div.className = "item";
-                            div.append(imgs[i]);
-                            box.append(div);
-                            waterFall();
-                            resolve();
-                        } else {
-                            console.log(i, imgLoading);
-                            resolve();
-                        }
-                    }
-                });
-            }
-            Promise.all(PromiseALl).then(() => {
-                imgLoading = true;
-                loading = false;
-            }).catch((reason) => {
-                console.log(reason)
-            });
-        },
-        error: err => {
-            console.log(err);
-        }
-    })
-}
-
-function getTops(page) {
-    $.ajax({
-        url: "/api/tops",
-        type: "get",
-        data: {
-            "page": page
-        },
-        dataType: "json",
-        success: res => {
-            page += 1;
-            localStorage.setItem("page", page);
-            let data = JSON.parse(res.data);
-            console.log(data.length);
-            let pics = []; //新的图片库
-            for (let i in data) {
-                pics.push(data[i]._dir);
-            }
-            let PromiseALl = []; //所有异步操作
-            let imgs = []; //新的图片集合
-            for (let i in pics) {
-                PromiseALl[i] = new Promise((resolve, reject) => {
-                    imgs[i] = new Image();
-                    imgs[i].src = pics[i];
-                    imgs[i].alt = "猜一猜";
-                    imgs[i].className = "mmImg";
-                    if (toggleFlag) {
-                        imgs[i].width = 373 / 100 * fontSize;
-                    } else {
-                        imgs[i].width = 184.5 / 100 * fontSize;
-                    }
-                    imgs[i].onload = function() {
-                        if (imgLoading) {
-                            $.hideLoading();
-                            console.log(i, imgLoading);
-                            let div = document.createElement("div");
-                            div.className = "item";
-                            div.append(imgs[i]);
-                            box.append(div);
-                            waterFall();
-                            resolve();
-                        } else {
-                            console.log(i, imgLoading);
-                            resolve();
-                        }
-                    }
-                });
-            }
-            Promise.all(PromiseALl).then(() => {
-                imgLoading = true;
-                loading = false;
-            }).catch((reason) => {
-                console.log(reason)
-            });
-        },
-        error: err => {
-            console.log(err)
-        }
-    });
-}
 //加载普通图片
 function getPics(page) {
-    // console.log(page)
+    let imgId = $("#pageId").text().trim();
     $.ajax({
-        url: "/api/pics",
+        url: "/api/details/" + imgId,
         type: "get",
         data: {
             "page": page
@@ -286,24 +100,23 @@ function getPics(page) {
                         imgs[i].width = 184.5 / 100 * fontSize;
                     }
                     imgs[i].onload = function() {
-                        if (imgLoading) {
-                            $.hideLoading();
-                            console.log(i, imgLoading);
-                            let div = document.createElement("div");
-                            div.className = "item";
-                            div.append(imgs[i]);
-                            box.append(div);
-                            waterFall();
-                            resolve();
-                        } else {
-                            console.log(i, imgLoading);
-                            resolve();
-                        }
+
+                        $.hideLoading();
+
+                        let div = document.createElement("div");
+                        div.className = "item";
+                        div.append(imgs[i]);
+                        box.append(div);
+                        waterFall();
+                        resolve();
+
                     }
                 });
             }
             Promise.all(PromiseALl).then(() => {
-                imgLoading = true;
+                // $(box).append(`<p class="">没有更多了</p>`);
+                // waterFall();
+
                 loading = false;
             }).catch((reason) => {
                 console.log(reason)

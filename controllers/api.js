@@ -38,5 +38,13 @@ module.exports = {
         ctx.rest({
             data: JSON.stringify(data)
         })
+    },
+    "GET /api/details/:imgId": async(ctx, next) => {
+        let imgId = ctx.params.imgId;
+        console.log(imgId)
+        let data = await db.getDetailsByImgId(imgId);
+        ctx.rest({
+            data: JSON.stringify(data)
+        })
     }
 }
