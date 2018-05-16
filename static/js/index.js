@@ -100,12 +100,15 @@ function getPics(page) {
                         imgs[i].width = 184.5 / 100 * fontSize;
                     }
                     imgs[i].onload = function() {
-
                         $.hideLoading();
-
                         let div = document.createElement("div");
                         div.className = "item";
                         div.append(imgs[i]);
+                        if (toggleFlag) {
+                            imgs[i].width = 373 / 100 * fontSize;
+                        } else {
+                            imgs[i].width = 184.5 / 100 * fontSize;
+                        }
                         box.append(div);
                         waterFall();
                         resolve();

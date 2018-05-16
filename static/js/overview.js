@@ -76,20 +76,15 @@ $(window).scroll(function() {
         sTop2 = sTop;
     }, 0);
 });
-//单双列
+
+//单双列 false单列  ture双列
 $("#toggleList").click(function() {
     if (toggleFlag == false) {
-        $(".item img").css("width", '3.75rem');
-        $(".item img").css("height", '5.625rem');
-        $(".item").width(375 / 100 * fontSize);
-        $(".text").width(375 / 100 * fontSize);
+        toggleBig();
         $("#toggleList").text("双列");
         toggleFlag = true;
     } else {
-        $(".item img").css("width", '1.7rem');
-        $(".item img").css("height", '2.55rem');
-        $(".item").width(170 / 100 * fontSize);
-        $(".text").width(170 / 100 * fontSize);
+        toggleSmall();
         $("#toggleList").text("单列");
         toggleFlag = false;
     }
@@ -145,26 +140,14 @@ function getRandom() {
                     imgs[i].alt = pics[i]._title;
                     imgs[i].setAttribute("data-imgId", pics[i]._imgId);
                     imgs[i].className = "mmImg";
-                    if (toggleFlag) {
-                        imgs[i].width = 375 / 100 * fontSize;
-                        $(".text").width(375 / 100 * fontSize)
-                    } else {
-                        imgs[i].width = 170 / 100 * fontSize;
-                        $(".text").width(170 / 100 * fontSize)
-                    }
                     imgs[i].onload = function() {
                         $.hideLoading();
                         let div = document.createElement("div");
                         div.className = "item";
                         div.append(imgs[i]);
                         $(div).append("<div class='text'><p class='title'>" + pics[i]._title + "</p></div>");
-                        if (toggleFlag) {
-                            $(".item").width(375 / 100 * fontSize);
-                            $(".text").width(375 / 100 * fontSize);
-                        } else {
-                            $(".item").width(170 / 100 * fontSize);
-                            $(".text").width(170 / 100 * fontSize);
-                        }
+                        console.log(toggleFlag)
+                        doToggle(toggleFlag)
                         $(div).wrapInner(`<a href="./details/${pics[i]._imgId}"></a>`);
                         box.append(div);
                         resolve();
@@ -173,14 +156,7 @@ function getRandom() {
                 });
             }
             Promise.all(PromiseALl).then(() => {
-                if (toggleFlag) {
-                    $(".item").width(375 / 100 * fontSize);
-                    $(".text").width(375 / 100 * fontSize);
-                } else {
-                    $(".item").width(170 / 100 * fontSize);
-                    $(".text").width(170 / 100 * fontSize);
-                }
-
+                doToggle(toggleFlag)
                 loading = false;
             }).catch((reason) => {
                 console.log(reason)
@@ -224,28 +200,13 @@ function getTops(page) {
                     imgs[i].alt = pics[i]._title;
                     imgs[i].setAttribute("data-imgId", pics[i]._imgId);
                     imgs[i].className = "mmImg";
-                    if (toggleFlag) {
-                        imgs[i].width = 375 / 100 * fontSize;
-                        $(".text").width(375 / 100 * fontSize)
-                    } else {
-                        imgs[i].width = 170 / 100 * fontSize;
-                        $(".text").width(170 / 100 * fontSize)
-                    }
                     imgs[i].onload = function() {
-
                         $.hideLoading();
-
                         let div = document.createElement("div");
                         div.className = "item";
                         div.append(imgs[i]);
                         $(div).append("<div class='text'><p class='title'>" + pics[i]._title + "</p></div>");
-                        if (toggleFlag) {
-                            $(".item").width(375 / 100 * fontSize);
-                            $(".text").width(375 / 100 * fontSize);
-                        } else {
-                            $(".item").width(170 / 100 * fontSize);
-                            $(".text").width(170 / 100 * fontSize);
-                        }
+                        doToggle(toggleFlag)
                         $(div).wrapInner(`<a href="./details/${pics[i]._imgId}"></a>`);
                         box.append(div);
                         resolve();
@@ -254,13 +215,7 @@ function getTops(page) {
                 });
             }
             Promise.all(PromiseALl).then(() => {
-                if (toggleFlag) {
-                    $(".item").width(375 / 100 * fontSize);
-                    $(".text").width(375 / 100 * fontSize);
-                } else {
-                    $(".item").width(170 / 100 * fontSize);
-                    $(".text").width(170 / 100 * fontSize);
-                }
+                doToggle(toggleFlag)
 
                 loading = false;
             }).catch((reason) => {
@@ -306,28 +261,14 @@ function getNormal(page) {
                     imgs[i].alt = pics[i]._title;
                     imgs[i].setAttribute("data-imgId", pics[i]._imgId);
                     imgs[i].className = "mmImg";
-                    if (toggleFlag) {
-                        imgs[i].width = 375 / 100 * fontSize;
-                        $(".text").width(375 / 100 * fontSize)
-                    } else {
-                        imgs[i].width = 170 / 100 * fontSize;
-                        $(".text").width(170 / 100 * fontSize)
-                    }
+
                     imgs[i].onload = function() {
-
                         $.hideLoading();
-
                         let div = document.createElement("div");
                         div.className = "item";
                         div.append(imgs[i]);
                         $(div).append("<div class='text'><p class='title'>" + pics[i]._title + "</p></div>");
-                        if (toggleFlag) {
-                            $(".item").width(375 / 100 * fontSize);
-                            $(".text").width(375 / 100 * fontSize);
-                        } else {
-                            $(".item").width(170 / 100 * fontSize);
-                            $(".text").width(170 / 100 * fontSize);
-                        }
+                        doToggle(toggleFlag)
                         $(div).wrapInner(`<a href="./details/${pics[i]._imgId}"></a>`);
                         box.append(div);
                         resolve();
@@ -336,13 +277,7 @@ function getNormal(page) {
                 });
             }
             Promise.all(PromiseALl).then(() => {
-                if (toggleFlag) {
-                    $(".item").width(375 / 100 * fontSize);
-                    $(".text").width(375 / 100 * fontSize);
-                } else {
-                    $(".item").width(170 / 100 * fontSize);
-                    $(".text").width(170 / 100 * fontSize);
-                }
+                doToggle(toggleFlag)
 
                 loading = false;
             }).catch((reason) => {
@@ -371,4 +306,26 @@ function initpage() {
     var _html = document.getElementsByTagName('html')[0];
     _html.style.fontSize = (view_width / 375) * 100 + 'px';
     fontSize = (view_width / 375) * 100;
+}
+
+function toggleBig() {
+    $(".item img").css("width", '3.75rem');
+    $(".item img").css("height", '5.625rem');
+    $(".item").width(375 / 100 * fontSize);
+    $(".text").width(375 / 100 * fontSize);
+}
+
+function toggleSmall() {
+    $(".item img").css("width", '1.7rem');
+    $(".item img").css("height", '2.55rem');
+    $(".item").width(170 / 100 * fontSize);
+    $(".text").width(170 / 100 * fontSize);
+}
+
+function doToggle(toggleFlag) {
+    if (toggleFlag) {
+        toggleBig();
+    } else {
+        toggleSmall();
+    }
 }
