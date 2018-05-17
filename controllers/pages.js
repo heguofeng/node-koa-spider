@@ -1,6 +1,6 @@
 module.exports = {
     'GET /': async(ctx, next) => {
-        ctx.render('overview.html', {
+        ctx.render('index.html', {
             title: ""
         })
     },
@@ -8,7 +8,7 @@ module.exports = {
         //图片人物的id
         let id = ctx.params.id;
         // console.log(id)
-        ctx.render('index.html', {
+        ctx.render('details.html', {
             id: id
         })
     }
