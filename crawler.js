@@ -25,14 +25,14 @@ var headers_img = {
     "Accept-Language": "zh-CN,zh;q=0.9",
     'Connection': 'keep-alive',
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.146 Safari/537.36",
-    "Host": "img.mmjpg.com"
+    "Host": "fm.shiyunjj.com"
 };
 //一开始获取每个人的具体信息
 async function getUrl() {
     console.log(common.formatDateTime(new Date()) + "获取所有的home页面集合");
     let webUrlArr = []; //要爬取的整个网站所有的页面合集数组
     let url;
-    for (let i = 1; i < 91; i++) {
+    for (let i = 1; i < 10; i++) {
         if (i == 1) {
             url = "http://www.mmjpg.com/";
             webUrlArr.push(url); //整个网站所有的页面
@@ -172,10 +172,10 @@ async function getAllSrcs() {
                             const pageCount = arr.length; //总页面
                             console.log(`${dir}文件夹下共有图片: `, pageCount, "张")
                             for (let i = 0; i < pageCount; i++) {
-                                // "http://img.mmjpg.com/2018/1300/1i0d.jpg"  格式
+                                // "http: //fm.shiyunjj.com/2018/1458/38ilr.jpg"  格式
                                 var j = i + 1;
                                 let item = {}
-                                item.imgSrc = "http://img.mmjpg.com/2018/" + urlArr.id + "/" + j + "i" + arr[i] + '.jpg';
+                                item.imgSrc = "http://fm.shiyunjj.com/2018/" + urlArr.id + "/" + j + "i" + arr[i] + '.jpg';
                                 item.dir = dir;
                                 item.id = urlArr.id;
                                 item.link = urlArr.link;
@@ -213,7 +213,8 @@ async function getAllSrcs() {
 
                             var $ = cheerio.load(res.text);
                             let pageCount = parseInt($('.main #page #opic').prev().text().trim());
-                            let _imgSrc = $("#content a img").attr("src").match(/^http\:\/\/img\.mmjpg\.com\/\d{4}\//); //前缀
+                            // "http: //fm.shiyunjj.com/2018/1458/38ilr.jpg"  格式
+                            let _imgSrc = $("#content a img").attr("src").match(/^http\:\/\/fm\.shiyunjj\.com\/\d{4}\//); //前缀
                             for (let i = 1; i <= pageCount; i++) {
                                 let item = {}
                                 item.imgSrc = _imgSrc + urlArr.id + "/" + i + '.jpg';
