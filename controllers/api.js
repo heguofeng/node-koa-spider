@@ -1,7 +1,5 @@
 const db = require('../db')
 const APIError = require('../rest').APIError;
-const webhttp = require('../webhttp')
-
 
 module.exports = {
     //新建一人

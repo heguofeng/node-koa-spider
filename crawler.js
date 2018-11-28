@@ -164,8 +164,10 @@ async function getAllSrcs() {
                             if (fs.existsSync(path.join(__dirname, '/static/pic', dir))) {
                                 console.log(common.formatDateTime(new Date()) + "已存在该文件名")
                             } else {
-                                fs.mkdir(path.join(__dirname, '/static/pic', dir))
-                                console.log(common.formatDateTime(new Date()) + `成功创建文件夹 ${dir}`)
+                                fs.mkdir(path.join(__dirname, '/static/pic', dir), err => {
+                                    if (err) console.log(err);
+                                    console.log(common.formatDateTime(new Date()) + `成功创建文件夹 ${dir}`)
+                                })
                             }
 
                             var arr = res.text.split(","); //获取后缀
@@ -207,8 +209,10 @@ async function getAllSrcs() {
                             if (fs.existsSync(path.join(__dirname, '/static/pic', dir))) {
                                 console.log(common.formatDateTime(new Date()) + "<----已存在该文件名--->" + dir)
                             } else {
-                                fs.mkdir(path.join(__dirname, '/static/pic', dir))
-                                console.log(common.formatDateTime(new Date()) + `<----成功创建文件夹----> ${dir}`)
+                                fs.mkdir(path.join(__dirname, '/static/pic', dir), err => {
+                                    if (err) console.log(err);
+                                    console.log(common.formatDateTime(new Date()) + `<----成功创建文件夹----> ${dir}`)
+                                })
                             }
 
                             var $ = cheerio.load(res.text);
@@ -263,7 +267,7 @@ let downloadImg = async function() {
 
         let delay = parseInt((Math.random() * 30000000) % 1000 + 1000, 10);
         concurrencyCount++;
-        console.log(`现在的并发数是${concurrencyCount}，正在下载${image.dir}的${image.imgSrc}，延迟${delay}mm`);
+        console.log(`现在的并发数是${concurrencyCount}，正在下载${image.imgSrc}，延迟${delay}mm`);
 
         if (fs.existsSync(path.join(__dirname, 'static', 'pic', image.dir, filename))) {
             //这里用异步函数等待一下数据库存取
@@ -363,7 +367,7 @@ async function downloadMainPics(imgs) {
             var _link = null;
             let delay = parseInt((Math.random() * 30000000) % 1000 + 1000, 10);
             concurrencyCount++;
-            console.log(`现在的并发数是${concurrencyCount}，正在下载${_dir}的${_mainImg}，延迟${delay}mm`);
+            console.log(`现在的并发数是${concurrencyCount}，正在下载${_mainImg}，延迟${delay}mm`);
             if (fs.existsSync(path.join(__dirname, "/static/pic/main/", _filename))) {
                 //这里用异步函数等待一下数据库存取
                 (async function() {
